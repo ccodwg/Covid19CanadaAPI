@@ -15,6 +15,8 @@ def individual():
     after = request.args.get('after')
     before = request.args.get('before')
     version = request.args.get('version')
+    print(stat)
+    print(loc)
     return "Hello, World!"
 
 @app.route('/timeseries')
