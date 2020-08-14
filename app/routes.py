@@ -67,6 +67,8 @@ def individual():
         dfs.append(mortality)
     for df in dfs:
 
+        df = df.fillna("NaN")
+
         if loc:
             if loc in province.keys():
                 df = df.loc[df.province == province[loc]]
