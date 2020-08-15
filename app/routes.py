@@ -188,7 +188,7 @@ def timeseries():
         active_can = pd.read_csv("https://raw.githubusercontent.com/ishaberry/Covid19Canada/master/timeseries_canada/active_timeseries_canada.csv",dayfirst=True)
         active_prov = pd.read_csv("https://raw.githubusercontent.com/ishaberry/Covid19Canada/master/timeseries_prov/active_timeseries_prov.csv",dayfirst=True)
         df = pd.concat([active_can,active_prov])
-        df['date_active'] = pd.to_datetime(df_final['date_active'],dayfirst=True)
+        df['date_active'] = pd.to_datetime(df['date_active'],dayfirst=True)
         dfs.append(df)
 
     for df in dfs:
