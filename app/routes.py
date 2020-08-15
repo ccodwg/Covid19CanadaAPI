@@ -125,6 +125,7 @@ def timeseries():
         cases_hr["province"] = cases_hr["health_region"]
         cases_hr.drop("health_region", axis=1,inplace=True)
         df = pd.concat([cases_can,cases_prov,cases_hr])
+        df['date_report'] = pd.to_datetime(df_final['date_report'],dayfirst=True)
         dfs.append(df)
     elif stat =='mortality':
         mortality_can = pd.read_csv("https://raw.githubusercontent.com/ishaberry/Covid19Canada/master/timeseries_canada/mortality_timeseries_canada.csv",dayfirst=True)
@@ -133,21 +134,25 @@ def timeseries():
         mortality_hr["province"] = mortality_hr["health_region"]
         mortality_hr.drop("health_region", axis=1,inplace=True)
         df = pd.concat([mortality_can,mortality_prov,mortality_hr])
+        df['date_death_report'] = pd.to_datetime(df_final['date_death_report'],dayfirst=True)
         dfs.append(df)
     elif stat =='recovered':
         recovered_can = pd.read_csv("https://raw.githubusercontent.com/ishaberry/Covid19Canada/master/timeseries_canada/recovered_timeseries_canada.csv",dayfirst=True)
         recovered_prov = pd.read_csv("https://raw.githubusercontent.com/ishaberry/Covid19Canada/master/timeseries_prov/recovered_timeseries_prov.csv",dayfirst=True)
         df = pd.concat([recovered_can,recovered_prov])
+        df['date_recovered'] = pd.to_datetime(df_final['date_recovered'],dayfirst=True)
         dfs.append(df)
     elif stat =='testing':
         testing_can = pd.read_csv("https://raw.githubusercontent.com/ishaberry/Covid19Canada/master/timeseries_canada/testing_timeseries_canada.csv",dayfirst=True)
         testing_prov = pd.read_csv("https://raw.githubusercontent.com/ishaberry/Covid19Canada/master/timeseries_prov/testing_timeseries_prov.csv",dayfirst=True)
         df = pd.concat([testing_can,testing_prov])
+        df['date_testing'] = pd.to_datetime(df_final['date_testing'],dayfirst=True)
         dfs.append(df)
     elif stat =='active':
         active_can = pd.read_csv("https://raw.githubusercontent.com/ishaberry/Covid19Canada/master/timeseries_canada/active_timeseries_canada.csv",dayfirst=True)
         active_prov = pd.read_csv("https://raw.githubusercontent.com/ishaberry/Covid19Canada/master/timeseries_prov/active_timeseries_prov.csv",dayfirst=True)
         df = pd.concat([active_can,active_prov])
+        df['date_active'] = pd.to_datetime(df_final['date_active'],dayfirst=True)
         dfs.append(df)
     else:
         cases_can = pd.read_csv("https://raw.githubusercontent.com/ishaberry/Covid19Canada/master/timeseries_canada/cases_timeseries_canada.csv",dayfirst=True)
@@ -156,6 +161,7 @@ def timeseries():
         cases_hr["province"] = cases_hr["health_region"]
         cases_hr.drop("health_region", axis=1,inplace=True)
         df = pd.concat([cases_can,cases_prov,cases_hr])
+        df['date_report'] = pd.to_datetime(df_final['date_report'],dayfirst=True)
         dfs.append(df)
 
         mortality_can = pd.read_csv("https://raw.githubusercontent.com/ishaberry/Covid19Canada/master/timeseries_canada/mortality_timeseries_canada.csv",dayfirst=True)
@@ -164,21 +170,25 @@ def timeseries():
         mortality_hr["province"] = mortality_hr["health_region"]
         mortality_hr.drop("health_region", axis=1,inplace=True)
         df = pd.concat([mortality_can,mortality_prov,mortality_hr])
+        df['date_death_report'] = pd.to_datetime(df_final['date_death_report'],dayfirst=True)
         dfs.append(df)
 
         recovered_can = pd.read_csv("https://raw.githubusercontent.com/ishaberry/Covid19Canada/master/timeseries_canada/recovered_timeseries_canada.csv",dayfirst=True)
         recovered_prov = pd.read_csv("https://raw.githubusercontent.com/ishaberry/Covid19Canada/master/timeseries_prov/recovered_timeseries_prov.csv",dayfirst=True)
         df = pd.concat([recovered_can,recovered_prov])
+        df['date_recovered'] = pd.to_datetime(df_final['date_recovered'],dayfirst=True)
         dfs.append(df)
 
         testing_can = pd.read_csv("https://raw.githubusercontent.com/ishaberry/Covid19Canada/master/timeseries_canada/testing_timeseries_canada.csv",dayfirst=True)
         testing_prov = pd.read_csv("https://raw.githubusercontent.com/ishaberry/Covid19Canada/master/timeseries_prov/testing_timeseries_prov.csv",dayfirst=True)
         df = pd.concat([testing_can,testing_prov])
+        df['date_testing'] = pd.to_datetime(df_final['date_testing'],dayfirst=True)
         dfs.append(df)
 
         active_can = pd.read_csv("https://raw.githubusercontent.com/ishaberry/Covid19Canada/master/timeseries_canada/active_timeseries_canada.csv",dayfirst=True)
         active_prov = pd.read_csv("https://raw.githubusercontent.com/ishaberry/Covid19Canada/master/timeseries_prov/active_timeseries_prov.csv",dayfirst=True)
         df = pd.concat([active_can,active_prov])
+        df['date_active'] = pd.to_datetime(df_final['date_active'],dayfirst=True)
         dfs.append(df)
 
     for df in dfs:
@@ -303,6 +313,7 @@ def summary():
     df_two = pd.merge(df_one,df_recovered,on=['province','date'], how='outer')
     df_three = pd.merge(df_two,df_testing,on=['province','date'], how='outer')
     df_final = pd.merge(df_three,df_active,on=['province','date'], how='outer')
+    df_final['date'] = pd.to_datetime(df_final['date'],dayfirst=True)
     df = df_final.fillna("NULL")
 
     if loc:
