@@ -227,11 +227,11 @@ def timeseries():
             if 'date_death_report' in df.columns:
                 df = df.loc[df.date_death_report >= after]
             if 'date_active' in df.columns:
-                df = df.loc[df.date_active >= date]
+                df = df.loc[df.date_active >= after]
             if 'date_recovered' in df.columns:
-                df = df.loc[df.date_recovered >= date]
+                df = df.loc[df.date_recovered >= after]
             if 'date_testing' in df.columns:
-                df = df.loc[df.date_testing >= date]
+                df = df.loc[df.date_testing >= after]
 
         if before:
             if 'date_report' in df.columns:
@@ -239,11 +239,11 @@ def timeseries():
             if 'date_death_report' in df.columns:
                 df = df.loc[df.date_death_report <= before]
             if 'date_active' in df.columns:
-                df = df.loc[df.date_active <= date]
+                df = df.loc[df.date_active <= before]
             if 'date_recovered' in df.columns:
-                df = df.loc[df.date_recovered <= date]
+                df = df.loc[df.date_recovered <= before]
             if 'date_testing' in df.columns:
-                df = df.loc[df.date_testing <= date]
+                df = df.loc[df.date_testing <= before]
 
         if version:
             if version=='true':
