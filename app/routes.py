@@ -351,4 +351,4 @@ def version():
     response = {}
     version = pd.read_csv("https://raw.githubusercontent.com/ishaberry/Covid19Canada/master/update_time.txt", sep="\t", header=None)
     response["version"] = version.head().values[0][0]
-    return version
+    return response
