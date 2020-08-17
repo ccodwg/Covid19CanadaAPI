@@ -247,8 +247,8 @@ def timeseries():
 
         if version:
             if version=='true':
-                version = pd.read_csv("https://raw.githubusercontent.com/ishaberry/Covid19Canada/master/update_time.txt", sep="\t", header=None)
-                response["version"] = version.head().values[0][0]
+                data = pd.read_csv("https://raw.githubusercontent.com/ishaberry/Covid19Canada/master/update_time.txt", sep="\t", header=None)
+                response["version"] = data.head().values[0][0]
 
         if 'date_report' in df.columns:
             response["cases"] = df.to_dict(orient='records')
