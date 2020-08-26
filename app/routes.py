@@ -299,11 +299,13 @@ def timeseries():
             elif loc == 'prov':
                 df = df.loc[df.province.isin(province.values())]
             elif loc == 'hr':
-                df = df.loc[df.province == health_region[loc]]
+                df = df.loc[df.province.isin(health_region.values())]
             elif loc in province.keys():
                 df = df.loc[df.province == province[loc]]
             elif loc in health_region.keys():
                 df = df.loc[df.province == health_region[loc]]
+            else:
+                return "Record not found", 404
 
         if date:
             if 'date_report' in df.columns:
