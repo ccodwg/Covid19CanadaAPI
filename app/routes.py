@@ -5,7 +5,7 @@ from datetime import datetime
 
 province = {"AB":"Alberta","BC":"BC","MB":"Manitoba","NB":"New Brunswick",
 "NL":"NL","NT":"NWT","NS":"Nova Scotia","NU":"Nunavut","ON":"Ontario",
-"PE":"PEI","QC":"Quebec","SK":"Saskatchewan","YT":"Yukon"}
+"PE":"PEI","QC":"Quebec","SK":"Saskatchewan","YT":"Yukon","RT":"Repatriated"}
 health_region = {"4832":"Calgary","4833":"Central","4834":"Edmonton",
 "4835":"North","4831":"South","591":"Fraser","592":"Interior",
 "593":"Island","594":"Northern","595":"Vancouver Coastal",
