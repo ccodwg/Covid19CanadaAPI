@@ -38,7 +38,7 @@ health_region = {"4832":"Calgary","4833":"Central","4834":"Edmonton",
 "2417":"Nunavik","2407":"Outaouais","2402":"Saguenay",
 "2418":"Terres-Cries-de-la-Baie-James","473":"Central",
 "471":"Far North","472":"North","475":"Regina","474":"Saskatoon",
-"476":"South","6001":"Yukon"}
+"476":"South","6001":"Yukon","9999":"Not Reported"}
 
 @app.route('/')
 @app.route('/index')
