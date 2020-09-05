@@ -538,69 +538,58 @@ def summary():
         datetime_str = version_df.head().values[0][0].split(' ')[0]
         date = datetime.strptime(datetime_str, '%Y-%m-%d')
 
-    cases_can = pd.read_csv("https://raw.githubusercontent.com/ishaberry/Covid19Canada/master/timeseries_canada/cases_timeseries_canada.csv",dayfirst=True)
-    cases_prov = pd.read_csv("https://raw.githubusercontent.com/ishaberry/Covid19Canada/master/timeseries_prov/cases_timeseries_prov.csv",dayfirst=True)
-    cases_hr = pd.read_csv("https://raw.githubusercontent.com/ishaberry/Covid19Canada/master/timeseries_hr/cases_timeseries_hr.csv",dayfirst=True)
-
     if loc == 'canada':
-        df_cases = cases_can
+        df_cases = cases_can = pd.read_csv("https://raw.githubusercontent.com/ishaberry/Covid19Canada/master/timeseries_canada/cases_timeseries_canada.csv")
         df_cases.rename(columns={"date_report":"date"},inplace=True)
     elif loc == 'prov' or loc in province.keys():
-        df_cases = cases_prov
+        df_cases = cases_prov = pd.read_csv("https://raw.githubusercontent.com/ishaberry/Covid19Canada/master/timeseries_prov/cases_timeseries_prov.csv")
         df_cases.rename(columns={"date_report":"date"},inplace=True)
     elif loc == 'hr' or loc in health_region.keys():
-        df_cases = cases_hr
+        df_cases = cases_hr = pd.read_csv("https://raw.githubusercontent.com/ishaberry/Covid19Canada/master/timeseries_hr/cases_timeseries_hr.csv")
         df_cases.rename(columns={"date_report":"date"},inplace=True)
     else:
         return "Record not found", 404
 
-    mortality_can = pd.read_csv("https://raw.githubusercontent.com/ishaberry/Covid19Canada/master/timeseries_canada/mortality_timeseries_canada.csv",dayfirst=True)
-    mortality_prov = pd.read_csv("https://raw.githubusercontent.com/ishaberry/Covid19Canada/master/timeseries_prov/mortality_timeseries_prov.csv",dayfirst=True)
-    mortality_hr = pd.read_csv("https://raw.githubusercontent.com/ishaberry/Covid19Canada/master/timeseries_hr/mortality_timeseries_hr.csv",dayfirst=True)
-
     if loc == 'canada':
-        df_mortality = mortality_can
+        df_mortality = mortality_can = pd.read_csv("https://raw.githubusercontent.com/ishaberry/Covid19Canada/master/timeseries_canada/mortality_timeseries_canada.csv")
         df_mortality.rename(columns={"date_death_report":"date"},inplace=True)
     elif loc == 'prov' or loc in province.keys():
-        df_mortality = mortality_prov
+        df_mortality = mortality_prov = pd.read_csv("https://raw.githubusercontent.com/ishaberry/Covid19Canada/master/timeseries_prov/mortality_timeseries_prov.csv")
         df_mortality.rename(columns={"date_death_report":"date"},inplace=True)
     elif loc == 'hr' or loc in health_region.keys():
-        df_mortality = mortality_hr
+        df_mortality = mortality_hr = pd.read_csv("https://raw.githubusercontent.com/ishaberry/Covid19Canada/master/timeseries_hr/mortality_timeseries_hr.csv")
         df_mortality.rename(columns={"date_death_report":"date"},inplace=True)
     else:
         return "Record not found", 404
 
-    recovered_can = pd.read_csv("https://raw.githubusercontent.com/ishaberry/Covid19Canada/master/timeseries_canada/recovered_timeseries_canada.csv",dayfirst=True)
-    recovered_prov = pd.read_csv("https://raw.githubusercontent.com/ishaberry/Covid19Canada/master/timeseries_prov/recovered_timeseries_prov.csv",dayfirst=True)
-
     if loc == 'canada':
-        df_recovered = recovered_can
+        df_recovered = recovered_can = pd.read_csv("https://raw.githubusercontent.com/ishaberry/Covid19Canada/master/timeseries_canada/recovered_timeseries_canada.csv")
         df_recovered.rename(columns={"date_recovered":"date"},inplace=True)
     elif loc == 'prov' or loc in province.keys():
-        df_recovered = recovered_prov
+        df_recovered = recovered_prov = pd.read_csv("https://raw.githubusercontent.com/ishaberry/Covid19Canada/master/timeseries_prov/recovered_timeseries_prov.csv")
         df_recovered.rename(columns={"date_recovered":"date"},inplace=True)
-
-    testing_can = pd.read_csv("https://raw.githubusercontent.com/ishaberry/Covid19Canada/master/timeseries_canada/testing_timeseries_canada.csv",dayfirst=True)
-    testing_prov = pd.read_csv("https://raw.githubusercontent.com/ishaberry/Covid19Canada/master/timeseries_prov/testing_timeseries_prov.csv",dayfirst=True)
-
-    if loc == 'canada':
-        df_testing = testing_can
-        df_testing.rename(columns={"date_testing":"date"},inplace=True)
-    elif loc == 'prov' or loc in province.keys():
-        df_testing = testing_prov
-        df_testing.rename(columns={"date_testing":"date"},inplace=True)
-
-    active_can = pd.read_csv("https://raw.githubusercontent.com/ishaberry/Covid19Canada/master/timeseries_canada/active_timeseries_canada.csv",dayfirst=True)
-    active_prov = pd.read_csv("https://raw.githubusercontent.com/ishaberry/Covid19Canada/master/timeseries_prov/active_timeseries_prov.csv",dayfirst=True)
+    else:
+        return "Record not found", 404        
 
     if loc == 'canada':
-        df_active = active_can
-        df_active.rename(columns={"date_active":"date"},inplace=True)
-        df_active = df_active[['province', 'date', 'active_cases','active_cases_change']]
+        df_testing = testing_can = pd.read_csv("https://raw.githubusercontent.com/ishaberry/Covid19Canada/master/timeseries_canada/testing_timeseries_canada.csv")
+        df_testing.rename(columns={"date_testing":"date"},inplace=True)
     elif loc == 'prov' or loc in province.keys():
-        df_active = active_prov
+        df_testing = testing_prov = pd.read_csv("https://raw.githubusercontent.com/ishaberry/Covid19Canada/master/timeseries_prov/testing_timeseries_prov.csv")
+        df_testing.rename(columns={"date_testing":"date"},inplace=True)
+    else:
+        return "Record not found", 404    
+
+    if loc == 'canada':
+        df_active = active_can = pd.read_csv("https://raw.githubusercontent.com/ishaberry/Covid19Canada/master/timeseries_canada/active_timeseries_canada.csv")
         df_active.rename(columns={"date_active":"date"},inplace=True)
-        df_active = df_active[['province', 'date', 'active_cases','active_cases_change']]
+        df_active = df_active[['province', 'date', 'active_cases', 'active_cases_change']]
+    elif loc == 'prov' or loc in province.keys():
+        df_active = active_prov = pd.read_csv("https://raw.githubusercontent.com/ishaberry/Covid19Canada/master/timeseries_prov/active_timeseries_prov.csv")
+        df_active.rename(columns={"date_active":"date"},inplace=True)
+        df_active = df_active[['province', 'date', 'active_cases', 'active_cases_change']]
+    else:
+        return "Record not found", 404        
 
     if loc == 'hr' or loc in health_region.keys():
         df_final = pd.merge(df_cases,df_mortality,on=['health_region','province','date'], how='outer')
@@ -609,7 +598,7 @@ def summary():
         df_two = pd.merge(df_one,df_recovered,on=['province','date'], how='outer')
         df_three = pd.merge(df_two,df_testing,on=['province','date'], how='outer')
         df_final = pd.merge(df_three,df_active,on=['province','date'], how='outer')
-    df_final['date'] = pd.to_datetime(df_final['date'],dayfirst=True)
+    df_final['date'] = pd.to_datetime(df_final['date'], dayfirst=True)
     df = df_final.fillna("NULL")
 
     if loc:
@@ -637,7 +626,6 @@ def summary():
         if version=='true':
             version = pd.read_csv("https://raw.githubusercontent.com/ishaberry/Covid19Canada/master/update_time.txt", sep="\t", header=None)
             response["version"] = version.head().values[0][0]
-
 
     df['date'] = df.date.dt.strftime('%d-%m-%Y')
     response["summary"] = df.to_dict(orient='records')
