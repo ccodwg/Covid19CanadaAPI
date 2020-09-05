@@ -77,11 +77,10 @@ def index():
 
     if not loc:
         loc = 'canada'
-    if not date:
+    if not date and not after and not before:
         version_df = pd.read_csv("https://raw.githubusercontent.com/ishaberry/Covid19Canada/master/update_time.txt", sep="\t", header=None)
         datetime_str = version_df.head().values[0][0].split(' ')[0]
-        datetime_object = datetime.strptime(datetime_str, '%Y-%m-%d')
-        date = datetime_object.strftime('%d-%m-%Y')
+        date = datetime.strptime(datetime_str, '%Y-%m-%d')
 
     cases_can = pd.read_csv("https://raw.githubusercontent.com/ishaberry/Covid19Canada/master/timeseries_canada/cases_timeseries_canada.csv",dayfirst=True)
     cases_prov = pd.read_csv("https://raw.githubusercontent.com/ishaberry/Covid19Canada/master/timeseries_prov/cases_timeseries_prov.csv",dayfirst=True)
@@ -503,11 +502,10 @@ def summary():
 
     if not loc:
         loc = 'prov'
-    if not date:
+    if not date and not after and not before:
         version_df = pd.read_csv("https://raw.githubusercontent.com/ishaberry/Covid19Canada/master/update_time.txt", sep="\t", header=None)
         datetime_str = version_df.head().values[0][0].split(' ')[0]
-        datetime_object = datetime.strptime(datetime_str, '%Y-%m-%d')
-        date = datetime_object.strftime('%d-%m-%Y')
+        date = datetime.strptime(datetime_str, '%Y-%m-%d')
 
     cases_can = pd.read_csv("https://raw.githubusercontent.com/ishaberry/Covid19Canada/master/timeseries_canada/cases_timeseries_canada.csv",dayfirst=True)
     cases_prov = pd.read_csv("https://raw.githubusercontent.com/ishaberry/Covid19Canada/master/timeseries_prov/cases_timeseries_prov.csv",dayfirst=True)
