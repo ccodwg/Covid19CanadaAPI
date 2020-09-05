@@ -45,8 +45,32 @@ health_region = {"4832":"Calgary","4833":"Central","4834":"Edmonton",
 def index():
     loc = request.args.get('loc')
     date = request.args.get('date')
+    if date:
+        try:
+            date = datetime.strptime(date, '%d-%m-%Y')
+        except:
+            try:
+                date = datetime.strptime(date, '%Y-%m-%d')
+            except:
+                date = None
     after = request.args.get('after')
+    if after:
+        try:
+            after = datetime.strptime(after, '%d-%m-%Y')
+        except:
+            try:
+                after = datetime.strptime(after, '%Y-%m-%d')
+            except:
+                after = None
     before = request.args.get('before')
+    if before:
+        try:
+            before = datetime.strptime(before, '%d-%m-%Y')
+        except:
+            try:
+                before = datetime.strptime(before, '%Y-%m-%d')
+            except:
+                before = None
     version = request.args.get('version')
     dfs = []
     response = {}
@@ -135,8 +159,32 @@ def individual():
     stat = request.args.get('stat')
     loc = request.args.get('loc')
     date = request.args.get('date')
+    if date:
+        try:
+            date = datetime.strptime(date, '%d-%m-%Y')
+        except:
+            try:
+                date = datetime.strptime(date, '%Y-%m-%d')
+            except:
+                date = None
     after = request.args.get('after')
+    if after:
+        try:
+            after = datetime.strptime(after, '%d-%m-%Y')
+        except:
+            try:
+                after = datetime.strptime(after, '%Y-%m-%d')
+            except:
+                after = None
     before = request.args.get('before')
+    if before:
+        try:
+            before = datetime.strptime(before, '%d-%m-%Y')
+        except:
+            try:
+                before = datetime.strptime(before, '%Y-%m-%d')
+            except:
+                before = None
     version = request.args.get('version')
     dfs = []
     response = {}
@@ -208,8 +256,32 @@ def timeseries():
     stat = request.args.get('stat')
     loc = request.args.get('loc')
     date = request.args.get('date')
+    if date:
+        try:
+            date = datetime.strptime(date, '%d-%m-%Y')
+        except:
+            try:
+                date = datetime.strptime(date, '%Y-%m-%d')
+            except:
+                date = None
     after = request.args.get('after')
+    if after:
+        try:
+            after = datetime.strptime(after, '%d-%m-%Y')
+        except:
+            try:
+                after = datetime.strptime(after, '%Y-%m-%d')
+            except:
+                after = None
     before = request.args.get('before')
+    if before:
+        try:
+            before = datetime.strptime(before, '%d-%m-%Y')
+        except:
+            try:
+                before = datetime.strptime(before, '%Y-%m-%d')
+            except:
+                before = None
     version = request.args.get('version')
     dfs = []
     response = {}
@@ -399,8 +471,32 @@ def timeseries():
 def summary():
     loc = request.args.get('loc')
     date = request.args.get('date')
+    if date:
+        try:
+            date = datetime.strptime(date, '%d-%m-%Y')
+        except:
+            try:
+                date = datetime.strptime(date, '%Y-%m-%d')
+            except:
+                date = None
     after = request.args.get('after')
+    if after:
+        try:
+            after = datetime.strptime(after, '%d-%m-%Y')
+        except:
+            try:
+                after = datetime.strptime(after, '%Y-%m-%d')
+            except:
+                after = None
     before = request.args.get('before')
+    if before:
+        try:
+            before = datetime.strptime(before, '%d-%m-%Y')
+        except:
+            try:
+                before = datetime.strptime(before, '%Y-%m-%d')
+            except:
+                before = None
     version = request.args.get('version')
     dfs = []
     response = {}
