@@ -108,7 +108,7 @@ def individual():
 
         if loc:
             if loc in province.keys():
-                df = df.loc[df.province == province[loc]]
+                df = df.loc[df.province == province[loc]['province']]
             elif loc in health_region.keys():
                 df = df.loc[df.health_region == health_region[loc]['health_region']]
 
@@ -314,7 +314,7 @@ def timeseries():
             elif loc == 'hr':
                 df = df.loc[df.health_region.isin(health_region.values())]
             elif loc in province.keys():
-                df = df.loc[df.province == province[loc]]
+                df = df.loc[df.province == province[loc]['province']]
             elif loc in health_region.keys():
                 df = df.loc[df.health_region == health_region[loc]['health_region']]
             else:
@@ -491,7 +491,7 @@ def summary():
         elif loc == 'hr':
             df = df.loc[df.health_region.isin(health_region.values())]
         elif loc in province.keys():
-            df = df.loc[df.province == province[loc]]
+            df = df.loc[df.province == province[loc]['province']]
         elif loc in health_region.keys():
             df = df.loc[df.health_region == health_region[loc]['health_region']]
 
