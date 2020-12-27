@@ -308,11 +308,11 @@ def timeseries():
 
         if loc:
             if loc == 'canada':
-                df = df.loc[df.province == 'Canada']
+                df
             elif loc == 'prov':
-                df = df.loc[df.province.isin(province.values())]
+                df
             elif loc == 'hr':
-                df = df.loc[df.health_region.isin(health_region.values())]
+                df
             elif loc in province.keys():
                 df = df.loc[df.province == province[loc]['province']]
             elif loc in health_region.keys():
@@ -485,11 +485,11 @@ def summary():
 
     if loc:
         if loc == 'canada':
-            df = df.loc[df.province == 'Canada']
+            df
         elif loc == 'prov':
-            df = df.loc[df.province.isin(province.values())]
+            df
         elif loc == 'hr':
-            df = df.loc[df.health_region.isin(health_region.values())]
+            df
         elif loc in province.keys():
             df = df.loc[df.province == province[loc]['province']]
         elif loc in health_region.keys():
