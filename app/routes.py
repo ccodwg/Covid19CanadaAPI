@@ -111,6 +111,8 @@ def individual():
                 df = df.loc[df.province == province[loc]['province']]
             elif loc in health_region.keys():
                 df = df.loc[df.health_region == health_region[loc]['health_region']]
+                if loc != '9999':
+                    df = df.loc[df.province == health_region[loc]['province']]                
 
         if date:
             if 'date_report' in df.columns:
@@ -317,6 +319,8 @@ def timeseries():
                 df = df.loc[df.province == province[loc]['province']]
             elif loc in health_region.keys():
                 df = df.loc[df.health_region == health_region[loc]['health_region']]
+                if loc != '9999':
+                    df = df.loc[df.province == health_region[loc]['province']]                
             else:
                 return "Record not found", 404
 
@@ -494,6 +498,8 @@ def summary():
             df = df.loc[df.province == province[loc]['province']]
         elif loc in health_region.keys():
             df = df.loc[df.health_region == health_region[loc]['health_region']]
+            if loc != '9999':
+                df = df.loc[df.province == health_region[loc]['province']]
 
     if date:
         df = df.loc[df.date == date]
