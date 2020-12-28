@@ -545,7 +545,7 @@ def summary():
         df_testing.rename(columns={"date_testing":"date"},inplace=True)
     elif loc == 'prov' or loc in province.keys():
         df_testing = testing_prov = pd.read_csv("https://raw.githubusercontent.com/ishaberry/Covid19Canada/master/timeseries_prov/testing_timeseries_prov.csv")
-        df_testing.rename(columns={"date_testing":"date"},inplace=True)   
+        df_testing.rename(columns={"date_testing":"date"},inplace=True)
 
     if loc == 'canada':
         df_active = active_can = pd.read_csv("https://raw.githubusercontent.com/ishaberry/Covid19Canada/master/timeseries_canada/active_timeseries_canada.csv")
@@ -556,13 +556,22 @@ def summary():
         df_active.rename(columns={"date_active":"date"},inplace=True)
         df_active = df_active[['province', 'date', 'active_cases', 'active_cases_change']]     
 
-    if loc == 'hr' or loc in health_region.keys():
-        df_final = pd.merge(df_cases,df_mortality,on=['health_region','province','date'], how='outer')
-    else:
-        df_one = pd.merge(df_cases,df_mortality,on=['province','date'], how='outer')
-        df_two = pd.merge(df_one,df_recovered,on=['province','date'], how='outer')
-        df_three = pd.merge(df_two,df_testing,on=['province','date'], how='outer')
-        df_final = pd.merge(df_three,df_active,on=['province','date'], how='outer')
+    if loc == 'canada':
+        df_avaccine = avaccine_can = pd.read_csv("https://raw.githubusercontent.com/ishaberry/Covid19Canada/master/timeseries_canada/vaccine_administration_timeseries_canada.csv")
+        df_avaccine.rename(columns={"date_vaccine_administered":"date"},inplace=True)
+    elif loc == 'prov' or loc in province.keys():
+        df_avaccine = avaccine_prov = pd.read_csv("https://raw.githubusercontent.com/ishaberry/Covid19Canada/master/timeseries_prov/vaccine_administration_timeseries_prov.csv")
+        df_avaccine.rename(columns={"date_vaccine_administered":"date"},inplace=True)
+
+    if loc == 'canada':
+        df_dvaccine = dvaccine_can = pd.read_csv("https://raw.githubusercontent.com/ishaberry/Covid19Canada/master/timeseries_canada/vaccine_distribution_timeseries_canada_timeseries_canada.csv")
+        df_dvaccine.rename(columns={"date_vaccine_distributed":"date"},inplace=True)
+    elif loc == 'prov' or loc in province.keys():
+        df_dvaccine = dvaccine_prov = pd.read_csv("https://raw.githubusercontent.com/ishaberry/Covid19Canada/master/timeseries_prov/vaccine_distribution_timeseries_prov.csv")
+        df_dvaccine.rename(columns={"date_vaccine_distributed":"date"},inplace=True)
+    
+    df_tomerge = [df_mortality, df_recovered, df_testing, df_active, df_avaccine, df_dvaccine]
+    df_final = reduce(lambda left, right: pd.merge(left, right, on=['date', 'province'], how='outer'), df_tomerge)
     df_final['date'] = pd.to_datetime(df_final['date'], dayfirst=True)
     df = df_final.fillna("NULL")
 
