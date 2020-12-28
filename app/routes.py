@@ -570,7 +570,10 @@ def summary():
         df_dvaccine = dvaccine_prov = pd.read_csv("https://raw.githubusercontent.com/ishaberry/Covid19Canada/master/timeseries_prov/vaccine_distribution_timeseries_prov.csv")
         df_dvaccine.rename(columns={"date_vaccine_distributed":"date"},inplace=True)
     
-    df_tomerge = [df_mortality, df_recovered, df_testing, df_active, df_avaccine, df_dvaccine]
+    if loc == 'hr' or loc in health_region.keys():
+        df_tomerge = [df_mortality]
+    else:
+        df_tomerge = [df_mortality, df_recovered, df_testing, df_active, df_avaccine, df_dvaccine]
     df_final = reduce(lambda left, right: pd.merge(left, right, on=['date', 'province'], how='outer'), df_tomerge)
     df_final['date'] = pd.to_datetime(df_final['date'], dayfirst=True)
     df = df_final.fillna("NULL")
