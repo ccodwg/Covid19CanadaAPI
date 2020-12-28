@@ -2,6 +2,7 @@ from app import app
 from flask import request
 import pandas as pd
 from datetime import datetime
+from functools import reduce
 
 province = pd.read_csv("https://raw.githubusercontent.com/ishaberry/Covid19Canada/master/other/prov_map.csv")[['province_short', 'province']].set_index(['province_short']).to_dict('index')
 health_region = pd.read_csv("https://raw.githubusercontent.com/ishaberry/Covid19Canada/master/other/hr_map.csv")[['HR_UID', 'province', 'health_region']]
@@ -35,12 +36,16 @@ def index():
     df_active = pd.read_csv("https://raw.githubusercontent.com/ishaberry/Covid19Canada/master/timeseries_canada/active_timeseries_canada.csv")
     df_active.rename(columns={"date_active":"date"},inplace=True)
     df_active = df_active[['province', 'date', 'active_cases','active_cases_change']]
-
-    df_one = pd.merge(df_cases,df_mortality,on=['province','date'], how='outer')
-    df_two = pd.merge(df_one,df_recovered,on=['province','date'], how='outer')
-    df_three = pd.merge(df_two,df_testing,on=['province','date'], how='outer')
-    df_final = pd.merge(df_three,df_active,on=['province','date'], how='outer')
-    df_final['date'] = pd.to_datetime(df_final['date'],dayfirst=True)
+    
+    df_avaccine = pd.read_csv("https://raw.githubusercontent.com/ishaberry/Covid19Canada/master/timeseries_canada/vaccine_administration_timeseries_canada.csv")
+    df_avaccine.rename(columns={"date_vaccine_administered":"date"},inplace=True)
+    
+    df_dvaccine = pd.read_csv("https://raw.githubusercontent.com/ishaberry/Covid19Canada/master/timeseries_canada/vaccine_distribution_timeseries_canada.csv")
+    df_dvaccine.rename(columns={"date_vaccine_distributed":"date"},inplace=True)
+    
+    df_tomerge = [df_mortality, df_recovered, df_testing, df_active, df_avaccine, df_dvaccine]
+    df_final = reduce(lambda left, right: pd.merge(left, right, on=['date', 'province'], how='outer'), df_tomerge)
+    df_final['date'] = pd.to_datetime(df_final['date'], dayfirst=True)
     df = df_final.fillna("NULL")
 
     df = df.loc[df.date == date]
