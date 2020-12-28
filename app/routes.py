@@ -271,6 +271,24 @@ def timeseries():
             active_prov = pd.read_csv("https://raw.githubusercontent.com/ishaberry/Covid19Canada/master/timeseries_prov/active_timeseries_prov.csv")
             active_prov['date_active'] = pd.to_datetime(active_prov['date_active'], dayfirst=True)
             dfs.append(active_prov)
+    elif stat == 'avaccine':
+        if loc == 'canada':
+            avaccine_can = pd.read_csv("https://raw.githubusercontent.com/ishaberry/Covid19Canada/master/timeseries_canada/vaccine_administration_timeseries_canada.csv")
+            avaccine_can['date_vaccine_administered'] = pd.to_datetime(avaccine_can['date_vaccine_administered'], dayfirst=True)
+            dfs.append(avaccine_can)
+        elif loc == 'prov' or loc in province.keys():
+            avaccine_prov = pd.read_csv("https://raw.githubusercontent.com/ishaberry/Covid19Canada/master/timeseries_prov/vaccine_administration_timeseries_prov.csv")
+            avaccine_prov['date_vaccine_administered'] = pd.to_datetime(avaccine_prov['date_vaccine_administered'], dayfirst=True)
+            dfs.append(avaccine_prov)
+    elif stat == 'dvaccine':
+        if loc == 'canada':
+            dvaccine_can = pd.read_csv("https://raw.githubusercontent.com/ishaberry/Covid19Canada/master/timeseries_canada/vaccine_distribution_timeseries_canada.csv")
+            dvaccine_can['date_vaccine_distributed'] = pd.to_datetime(dvaccine_can['date_vaccine_distributed'], dayfirst=True)
+            dfs.append(dvaccine_can)
+        elif loc == 'prov' or loc in province.keys():
+            dvaccine_prov = pd.read_csv("https://raw.githubusercontent.com/ishaberry/Covid19Canada/master/timeseries_prov/vaccine_distribution_timeseries_prov.csv")
+            dvaccine_prov['date_vaccine_distributed'] = pd.to_datetime(dvaccine_prov['date_vaccine_distributed'], dayfirst=True)
+            dfs.append(dvaccine_prov)
     else:
         if loc == 'canada':
             cases_can = pd.read_csv("https://raw.githubusercontent.com/ishaberry/Covid19Canada/master/timeseries_canada/cases_timeseries_canada.csv")
@@ -326,6 +344,24 @@ def timeseries():
             active_prov = pd.read_csv("https://raw.githubusercontent.com/ishaberry/Covid19Canada/master/timeseries_prov/active_timeseries_prov.csv")
             active_prov['date_active'] = pd.to_datetime(active_prov['date_active'], dayfirst=True)
             dfs.append(active_prov)
+            
+        if loc == 'canada':
+            avaccine_can = pd.read_csv("https://raw.githubusercontent.com/ishaberry/Covid19Canada/master/timeseries_canada/vaccine_administration_timeseries_canada.csv")
+            avaccine_can['date_vaccine_administered'] = pd.to_datetime(avaccine_can['date_vaccine_administered'], dayfirst=True)
+            dfs.append(avaccine_can)
+        elif loc == 'prov' or loc in province.keys():
+            avaccine_prov = pd.read_csv("https://raw.githubusercontent.com/ishaberry/Covid19Canada/master/timeseries_prov/vaccine_administration_timeseries_prov.csv")
+            avaccine_prov['date_vaccine_administered'] = pd.to_datetime(avaccine_prov['date_vaccine_administered'], dayfirst=True)
+            dfs.append(avaccine_prov)        
+        
+        if loc == 'canada':
+            dvaccine_can = pd.read_csv("https://raw.githubusercontent.com/ishaberry/Covid19Canada/master/timeseries_canada/vaccine_distribution_timeseries_canada.csv")
+            dvaccine_can['date_vaccine_distributed'] = pd.to_datetime(dvaccine_can['date_vaccine_distributed'], dayfirst=True)
+            dfs.append(dvaccine_can)
+        elif loc == 'prov' or loc in province.keys():
+            dvaccine_prov = pd.read_csv("https://raw.githubusercontent.com/ishaberry/Covid19Canada/master/timeseries_prov/vaccine_distribution_timeseries_prov.csv")
+            dvaccine_prov['date_vaccine_distributed'] = pd.to_datetime(dvaccine_prov['date_vaccine_distributed'], dayfirst=True)
+            dfs.append(dvaccine_prov)        
 
     for df in dfs:
 
@@ -358,6 +394,10 @@ def timeseries():
                 df = df.loc[df.date_recovered == date]
             if 'date_testing' in df.columns:
                 df = df.loc[df.date_testing == date]
+            if 'date_vaccine_administered' in df.columns:
+                df = df.loc[df.date_vaccine_administered == date]
+            if 'date_vaccine_distributed' in df.columns:
+                df = df.loc[df.date_vaccine_distributed == date]
 
         if after:
             if 'date_report' in df.columns:
@@ -370,7 +410,11 @@ def timeseries():
                 df = df.loc[df.date_recovered >= after]
             if 'date_testing' in df.columns:
                 df = df.loc[df.date_testing >= after]
-
+            if 'date_vaccine_administered' in df.columns:
+                df = df.loc[df.date_vaccine_administered>= date]
+            if 'date_vaccine_distributed' in df.columns:
+                df = df.loc[df.date_vaccine_distributed >= date]
+                    
         if before:
             if 'date_report' in df.columns:
                 df = df.loc[df.date_report <= before]
@@ -382,6 +426,10 @@ def timeseries():
                 df = df.loc[df.date_recovered <= before]
             if 'date_testing' in df.columns:
                 df = df.loc[df.date_testing <= before]
+            if 'date_vaccine_administered' in df.columns:
+                df = df.loc[df.date_vaccine_administered <= date]
+            if 'date_vaccine_distributed' in df.columns:
+                df = df.loc[df.date_vaccine_distributed <= date]            
 
         if version:
             if version=='true':
@@ -398,7 +446,11 @@ def timeseries():
             df['date_testing'] = df['date_testing'].dt.strftime('%d-%m-%Y')
         if 'date_active' in df.columns:
             df['date_active'] = df['date_active'].dt.strftime('%d-%m-%Y')
-
+        if 'date_vaccine_administered' in df.columns:
+            df['date_vaccine_administered'] = df['date_vaccine_administered'].dt.strftime('%d-%m-%Y')
+        if 'date_vaccine_distributed' in df.columns:
+            df['date_vaccine_distributed'] = df['date_vaccine_distributed'].dt.strftime('%d-%m-%Y')
+                
         if 'date_report' in df.columns:
             response["cases"] = df.to_dict(orient='records')
         if 'date_death_report' in df.columns:
@@ -408,7 +460,11 @@ def timeseries():
         if 'date_testing' in df.columns:
             response["testing"] = df.to_dict(orient='records')
         if 'date_active' in df.columns:
-            response["active"] = df.to_dict(orient='records')            
+            response["active"] = df.to_dict(orient='records')
+        if 'date_vaccine_administered' in df.columns:
+            response["avaccine"] = df.to_dict(orient='records')
+        if 'date_vaccine_distributed' in df.columns:
+            response["dvaccine"] = df.to_dict(orient='records')        
 
     return response
 
