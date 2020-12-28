@@ -564,7 +564,7 @@ def summary():
         df_avaccine.rename(columns={"date_vaccine_administered":"date"},inplace=True)
 
     if loc == 'canada':
-        df_dvaccine = dvaccine_can = pd.read_csv("https://raw.githubusercontent.com/ishaberry/Covid19Canada/master/timeseries_canada/vaccine_distribution_timeseries_canada_timeseries_canada.csv")
+        df_dvaccine = dvaccine_can = pd.read_csv("https://raw.githubusercontent.com/ishaberry/Covid19Canada/master/timeseries_canada/vaccine_distribution_timeseries_canada.csv")
         df_dvaccine.rename(columns={"date_vaccine_distributed":"date"},inplace=True)
     elif loc == 'prov' or loc in province.keys():
         df_dvaccine = dvaccine_prov = pd.read_csv("https://raw.githubusercontent.com/ishaberry/Covid19Canada/master/timeseries_prov/vaccine_distribution_timeseries_prov.csv")
