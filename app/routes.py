@@ -91,16 +91,33 @@ def individual():
     if stat == 'cases':
         cases = pd.read_csv("https://raw.githubusercontent.com/ishaberry/Covid19Canada/master/cases.csv")
         cases['date_report'] = pd.to_datetime(cases['date_report'],dayfirst=True)
+        if extra and extra=='false':
+            pass
+        else:
+            case_source = pd.read_csv("https://raw.githubusercontent.com/ishaberry/Covid19Canada/master/cases_extra/cases_case_source.csv")[['case_source_short', 'case_source_full']]
+            cases = cases.merge(case_source, left_on='case_source', right_on='case_source_short', how='left').drop(columns=['case_source', 'case_source_short']).rename(columns={'case_source_full': 'case_source'})
         dfs.append(cases)
     elif stat =='mortality':
         mortality = pd.read_csv("https://raw.githubusercontent.com/ishaberry/Covid19Canada/master/mortality.csv")
         mortality['date_death_report'] = pd.to_datetime(mortality['date_death_report'],dayfirst=True)
+        if extra and extra=='false':
+            pass
+        else:
+            death_source = pd.read_csv("https://raw.githubusercontent.com/ishaberry/Covid19Canada/master/mortality_extra/mortality_death_source.csv")[['death_source_short', 'death_source_full']]
+            mortality = mortality.merge(death_source, left_on='death_source', right_on='death_source_short', how='left').drop(columns=['death_source', 'death_source_short']).rename(columns={'death_source_full': 'death_source'})
         dfs.append(mortality)
     else:
         cases = pd.read_csv("https://raw.githubusercontent.com/ishaberry/Covid19Canada/master/cases.csv")
         mortality = pd.read_csv("https://raw.githubusercontent.com/ishaberry/Covid19Canada/master/mortality.csv")
         cases['date_report'] = pd.to_datetime(cases['date_report'],dayfirst=True)
         mortality['date_death_report'] = pd.to_datetime(mortality['date_death_report'],dayfirst=True)
+        if extra and extra=='false':
+            pass
+        else:
+            case_source = pd.read_csv("https://raw.githubusercontent.com/ishaberry/Covid19Canada/master/cases_extra/cases_case_source.csv")[['case_source_short', 'case_source_full']]
+            cases = cases.merge(case_source, left_on='case_source', right_on='case_source_short', how='left').drop(columns=['case_source', 'case_source_short']).rename(columns={'case_source_full': 'case_source'})
+            death_source = pd.read_csv("https://raw.githubusercontent.com/ishaberry/Covid19Canada/master/mortality_extra/mortality_death_source.csv")[['death_source_short', 'death_source_full']]
+            mortality = mortality.merge(death_source, left_on='death_source', right_on='death_source_short', how='left').drop(columns=['death_source', 'death_source_short']).rename(columns={'death_source_full': 'death_source'})
         dfs.append(cases)
         dfs.append(mortality)
     for df in dfs:
@@ -133,15 +150,6 @@ def individual():
             if 'date_death_report' in df.columns:
                 df = df.loc[df.date_death_report <= before]
         
-        if extra and extra=='false':
-            pass
-        else:
-            if stat=='cases':
-                case_source = pd.read_csv("https://raw.githubusercontent.com/ishaberry/Covid19Canada/master/cases_extra/cases_case_source.csv")[['case_source_short', 'case_source_full']]
-                df = df.merge(case_source, left_on='case_source', right_on='case_source_short', how='left').drop(columns=['case_source', 'case_source_short']).rename(columns={'case_source_full': 'case_source'})
-            if stat=='mortality':
-                death_source = pd.read_csv("https://raw.githubusercontent.com/ishaberry/Covid19Canada/master/mortality_extra/mortality_death_source.csv")[['death_source_short', 'death_source_full']]
-                df = df.merge(death_source, left_on='death_source', right_on='death_source_short', how='left').drop(columns=['death_source', 'death_source_short']).rename(columns={'death_source_full': 'death_source'})
         if version:
             if version=='true':
                 version = pd.read_csv("https://raw.githubusercontent.com/ishaberry/Covid19Canada/master/update_time.txt", sep="\t", header=None)
