@@ -572,9 +572,10 @@ def summary():
     
     if loc == 'hr' or loc in health_region.keys():
         df_tomerge = [df_cases, df_mortality]
+        df_final = reduce(lambda left, right: pd.merge(left, right, on=['date', 'province', 'health_region'], how='outer'), df_tomerge)
     else:
         df_tomerge = [df_cases, df_mortality, df_recovered, df_testing, df_active, df_avaccine, df_dvaccine]
-    df_final = reduce(lambda left, right: pd.merge(left, right, on=['date', 'province'], how='outer'), df_tomerge)
+        df_final = reduce(lambda left, right: pd.merge(left, right, on=['date', 'province'], how='outer'), df_tomerge)
     df_final['date'] = pd.to_datetime(df_final['date'], dayfirst=True)
     df = df_final.fillna("NULL")
 
