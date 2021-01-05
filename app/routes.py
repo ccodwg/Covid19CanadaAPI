@@ -4,6 +4,9 @@ import pandas as pd
 from datetime import datetime
 from functools import reduce
 
+from flask_cors import CORS
+CORS(app)
+
 province = pd.read_csv("https://raw.githubusercontent.com/ishaberry/Covid19Canada/master/other/prov_map.csv")[['province_short', 'province']].set_index(['province_short']).to_dict('index')
 health_region = pd.read_csv("https://raw.githubusercontent.com/ishaberry/Covid19Canada/master/other/hr_map.csv")[['HR_UID', 'province', 'health_region']]
 health_region.loc[health_region.HR_UID == 9999, "province"] = "All Provinces"
