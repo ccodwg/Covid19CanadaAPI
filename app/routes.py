@@ -65,6 +65,8 @@ def individual():
     stat = request.args.get('stat')
     loc = request.args.get('loc')
     date = request.args.get('date')
+    ymd = request.args.get('ymd')
+    extra = request.args.get('extra')
     if date:
         try:
             date = datetime.strptime(date, '%d-%m-%Y')
@@ -91,13 +93,13 @@ def individual():
                 before = datetime.strptime(before, '%Y-%m-%d')
             except:
                 before = None
-    extra = request.args.get('extra')
     version = request.args.get('version')
     dfs = []
     response = {}
     if stat == 'cases':
         cases = pd.read_csv("https://raw.githubusercontent.com/ishaberry/Covid19Canada/master/cases.csv")
         cases['date_report'] = pd.to_datetime(cases['date_report'],dayfirst=True)
+        cases['report_week'] = pd.to_datetime(cases['report_week'],dayfirst=True)
         if extra and extra=='false':
             pass
         else:
@@ -163,9 +165,17 @@ def individual():
                 response["version"] = version.head().values[0][0]
 
         if 'date_report' in df.columns:
-            df['date_report'] = df['date_report'].dt.strftime('%d-%m-%Y')
+            if ymd and ymd=='true':
+                df['date_report'] = df.date_report.dt.strftime('%Y-%m-%d')
+                df['report_week'] = df.report_week.dt.strftime('%Y-%m-%d')
+            else:
+                df['date_report'] = df.date_report.dt.strftime('%d-%m-%Y')
+                df['report_week'] = df.report_week.dt.strftime('%d-%m-%Y')
         if 'date_death_report' in df.columns:
-            df['date_death_report'] = df['date_death_report'].dt.strftime('%d-%m-%Y')
+            if ymd and ymd=='true':
+                df['date_death_report'] = df.date_death_report.dt.strftime('%Y-%m-%d')
+            else:
+                df['date_death_report'] = df.date_death_report.dt.strftime('%d-%m-%Y')
 
         if 'date_report' in df.columns:
             response["cases"] = df.to_dict(orient='records')
@@ -181,6 +191,7 @@ def timeseries():
     stat = request.args.get('stat')
     loc = request.args.get('loc')
     date = request.args.get('date')
+    ymd = request.args.get('ymd')
     if date:
         try:
             date = datetime.strptime(date, '%d-%m-%Y')
@@ -439,19 +450,40 @@ def timeseries():
                 response["version"] = data.head().values[0][0]
 
         if 'date_report' in df.columns:
-            df['date_report'] = df['date_report'].dt.strftime('%d-%m-%Y')
+            if ymd and ymd=='true':
+                df['date_report'] = df.date_report.dt.strftime('%Y-%m-%d')
+            else:
+                df['date_report'] = df.date_report.dt.strftime('%d-%m-%Y')
         if 'date_death_report' in df.columns:
-            df['date_death_report'] = df['date_death_report'].dt.strftime('%d-%m-%Y')
+            if ymd and ymd=='true':
+                df['date_death_report'] = df.date_death_report.dt.strftime('%Y-%m-%d')
+            else:
+                df['date_death_report'] = df.date_death_report.dt.strftime('%d-%m-%Y')
         if 'date_recovered' in df.columns:
-            df['date_recovered'] = df['date_recovered'].dt.strftime('%d-%m-%Y')
+            if ymd and ymd=='true':
+                df['date_recovered'] = df.date_recovered.dt.strftime('%Y-%m-%d')
+            else:
+                df['date_recovered'] = df.date_recovered.dt.strftime('%d-%m-%Y')
         if 'date_testing' in df.columns:
-            df['date_testing'] = df['date_testing'].dt.strftime('%d-%m-%Y')
+            if ymd and ymd=='true':
+                df['date_testing'] = df.date_testing.dt.strftime('%Y-%m-%d')
+            else:
+                df['date_testing'] = df.date_testing.dt.strftime('%d-%m-%Y')
         if 'date_active' in df.columns:
-            df['date_active'] = df['date_active'].dt.strftime('%d-%m-%Y')
+            if ymd and ymd=='true':
+                df['date_active'] = df.date_active.dt.strftime('%Y-%m-%d')
+            else:
+                df['date_active'] = df.date_active.dt.strftime('%d-%m-%Y')
         if 'date_vaccine_administered' in df.columns:
-            df['date_vaccine_administered'] = df['date_vaccine_administered'].dt.strftime('%d-%m-%Y')
+            if ymd and ymd=='true':
+                df['date_vaccine_administered'] = df.date_vaccine_administered.dt.strftime('%Y-%m-%d')
+            else:
+                df['date_vaccine_administered'] = df.date_vaccine_administered.dt.strftime('%d-%m-%Y')
         if 'date_vaccine_distributed' in df.columns:
-            df['date_vaccine_distributed'] = df['date_vaccine_distributed'].dt.strftime('%d-%m-%Y')
+            if ymd and ymd=='true':
+                df['date_vaccine_distributed'] = df.date_vaccine_distributed.dt.strftime('%Y-%m-%d')
+            else:
+                df['date_vaccine_distributed'] = df.date_vaccine_distributed.dt.strftime('%d-%m-%Y')
                 
         if 'date_report' in df.columns:
             response["cases"] = df.to_dict(orient='records')
@@ -474,6 +506,7 @@ def timeseries():
 def summary():
     loc = request.args.get('loc')
     date = request.args.get('date')
+    ymd = request.args.get('ymd')
     if date:
         try:
             date = datetime.strptime(date, '%d-%m-%Y')
@@ -608,8 +641,11 @@ def summary():
         if version=='true':
             version = pd.read_csv("https://raw.githubusercontent.com/ishaberry/Covid19Canada/master/update_time.txt", sep="\t", header=None)
             response["version"] = version.head().values[0][0]
-
-    df['date'] = df.date.dt.strftime('%d-%m-%Y')
+    
+    if ymd and ymd=='true':
+        df['date'] = df.date.dt.strftime('%Y-%m-%d')
+    else:
+        df['date'] = df.date.dt.strftime('%d-%m-%Y')
     response["summary"] = df.to_dict(orient='records')
 
     return response
