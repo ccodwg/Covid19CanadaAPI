@@ -103,7 +103,7 @@ def individual():
         if extra and extra=='false':
             pass
         else:
-            case_source = pd.read_csv("https://raw.githubusercontent.com/ishaberry/Covid19Canada/master/cases_extra/cases_case_source.csv")[['case_source_short', 'case_source_full']]
+            case_source = pd.read_csv("https://raw.githubusercontent.com/ishaberry/Covid19Canada/master/other/cases_extra/cases_case_source.csv")[['case_source_short', 'case_source_full']]
             cases = cases.merge(case_source, left_on='case_source', right_on='case_source_short', how='left').drop(columns=['case_source', 'case_source_short']).rename(columns={'case_source_full': 'case_source'})
         dfs.append(cases)
     elif stat =='mortality':
@@ -112,7 +112,7 @@ def individual():
         if extra and extra=='false':
             pass
         else:
-            death_source = pd.read_csv("https://raw.githubusercontent.com/ishaberry/Covid19Canada/master/mortality_extra/mortality_death_source.csv")[['death_source_short', 'death_source_full']]
+            death_source = pd.read_csv("https://raw.githubusercontent.com/ishaberry/Covid19Canada/master/other/mortality_extra/mortality_death_source.csv")[['death_source_short', 'death_source_full']]
             mortality = mortality.merge(death_source, left_on='death_source', right_on='death_source_short', how='left').drop(columns=['death_source', 'death_source_short']).rename(columns={'death_source_full': 'death_source'})
         dfs.append(mortality)
     else:
@@ -123,9 +123,9 @@ def individual():
         if extra and extra=='false':
             pass
         else:
-            case_source = pd.read_csv("https://raw.githubusercontent.com/ishaberry/Covid19Canada/master/cases_extra/cases_case_source.csv")[['case_source_short', 'case_source_full']]
+            case_source = pd.read_csv("https://raw.githubusercontent.com/ishaberry/Covid19Canada/master/other/cases_extra/cases_case_source.csv")[['case_source_short', 'case_source_full']]
             cases = cases.merge(case_source, left_on='case_source', right_on='case_source_short', how='left').drop(columns=['case_source', 'case_source_short']).rename(columns={'case_source_full': 'case_source'})
-            death_source = pd.read_csv("https://raw.githubusercontent.com/ishaberry/Covid19Canada/master/mortality_extra/mortality_death_source.csv")[['death_source_short', 'death_source_full']]
+            death_source = pd.read_csv("https://raw.githubusercontent.com/ishaberry/Covid19Canada/master/other/mortality_extra/mortality_death_source.csv")[['death_source_short', 'death_source_full']]
             mortality = mortality.merge(death_source, left_on='death_source', right_on='death_source_short', how='left').drop(columns=['death_source', 'death_source_short']).rename(columns={'death_source_full': 'death_source'})
         dfs.append(cases)
         dfs.append(mortality)
