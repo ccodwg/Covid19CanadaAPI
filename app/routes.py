@@ -425,9 +425,9 @@ def timeseries():
             if 'date_testing' in df.columns:
                 df = df.loc[df.date_testing >= after]
             if 'date_vaccine_administered' in df.columns:
-                df = df.loc[df.date_vaccine_administered>= date]
+                df = df.loc[df.date_vaccine_administered>= after]
             if 'date_vaccine_distributed' in df.columns:
-                df = df.loc[df.date_vaccine_distributed >= date]
+                df = df.loc[df.date_vaccine_distributed >= after]
                     
         if before:
             if 'date_report' in df.columns:
@@ -441,9 +441,9 @@ def timeseries():
             if 'date_testing' in df.columns:
                 df = df.loc[df.date_testing <= before]
             if 'date_vaccine_administered' in df.columns:
-                df = df.loc[df.date_vaccine_administered <= date]
+                df = df.loc[df.date_vaccine_administered <= before]
             if 'date_vaccine_distributed' in df.columns:
-                df = df.loc[df.date_vaccine_distributed <= date]            
+                df = df.loc[df.date_vaccine_distributed <= before]            
 
         if version:
             if version=='true':
