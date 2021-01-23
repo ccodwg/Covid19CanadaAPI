@@ -56,7 +56,7 @@ def index():
 
 @app.route('/individual')
 def individual():
-    return "Individual level data return is temporarily disabled, please download from GitHub: https://github.com/ishaberry/Covid19Canada", 404
+    return "Individual level data return is temporarily disabled, please download from GitHub: https://github.com/ccodwg/Covid19Canada", 404
     #stat = request.args.get('stat')
     #loc = request.args.get('loc')
     #date = request.args.get('date')
@@ -178,8 +178,6 @@ def individual():
             #response["mortality"] = df.to_dict(orient='records')
 
     #return response
-
-
 
 @app.route('/timeseries')
 def timeseries():
