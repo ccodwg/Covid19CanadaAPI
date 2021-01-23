@@ -22,6 +22,26 @@ def date_arg(arg):
             arg = None
     return arg
 
+# list of dataset by location
+data_canada = ('cases_timeseries_canada',
+               'mortality_timeseries_canada',
+               'recovered_timeseries_canada',
+               'testing_timeseries_canada',
+               'active_timeseries_canada',
+               'vaccine_administration_timeseries_canada',
+               'vaccine_distribution_timeseries_canada',
+               'vaccine_completion_timeseries_canada')
+data_prov = ('cases_timeseries_prov',
+            'mortality_timeseries_prov',
+            'recovered_timeseries_prov',
+            'testing_timeseries_prov',
+            'active_timeseries_prov',
+            'vaccine_administration_timeseries_prov',
+            'vaccine_distribution_timeseries_prov',
+            'vaccine_completion_timeseries_prov')
+data_hr = ('cases_timeseries_hr',
+           'mortality_timeseries_hr')
+
 @app.route('/')
 @app.route('/index')
 def index():
@@ -31,14 +51,7 @@ def index():
     response = {}
     
     # subset dataframes
-    dfs = {k: data.ccodwg[k] for k in ('cases_timeseries_canada',
-                                       'mortality_timeseries_canada',
-                                       'recovered_timeseries_canada',
-                                       'testing_timeseries_canada',
-                                       'active_timeseries_canada',
-                                       'vaccine_administration_timeseries_canada',
-                                       'vaccine_distribution_timeseries_canada',
-                                       'vaccine_completion_timeseries_canada')}
+    dfs = {k: data.ccodwg[k] for k in data_canada}
     
     # rename date columns
     for df in dfs.values():
@@ -499,158 +512,101 @@ def timeseries():
 @app.route('/summary')
 def summary():
     
-    # get arguments
+    # initialize response
+    dfs = []
+    response = {}    
+    
+    # read arguments
     loc = request.args.get('loc')
     date = request.args.get('date')
-    ymd = request.args.get('ymd')
-    
-    
-    if date:
-        try:
-            date = datetime.strptime(date, '%d-%m-%Y')
-        except:
-            try:
-                date = datetime.strptime(date, '%Y-%m-%d')
-            except:
-                date = None
     after = request.args.get('after')
-    if after:
-        try:
-            after = datetime.strptime(after, '%d-%m-%Y')
-        except:
-            try:
-                after = datetime.strptime(after, '%Y-%m-%d')
-            except:
-                after = None
     before = request.args.get('before')
-    if before:
-        try:
-            before = datetime.strptime(before, '%d-%m-%Y')
-        except:
-            try:
-                before = datetime.strptime(before, '%Y-%m-%d')
-            except:
-                before = None
+    ymd = request.args.get('ymd')
     version = request.args.get('version')
-    dfs = []
-    response = {}
-
+    
+    # process date arguments
+    if date:
+        date = date_arg(date)
+    if after:
+        after = date_arg(after)
+    if before:
+        before = date_arg(before)
+        
+    # default arguments
+    if not date and not after and not before:
+        date = data.version['date']
     if not loc:
         loc = 'prov'
-    if not date and not after and not before:
-        version_df = pd.read_csv("https://raw.githubusercontent.com/ishaberry/Covid19Canada/master/update_time.txt", sep="\t", header=None)
-        datetime_str = version_df.head().values[0][0].split(' ')[0]
-        date = datetime.strptime(datetime_str, '%Y-%m-%d')
-
-    if loc == 'canada':
-        df_cases = cases_can = pd.read_csv("https://raw.githubusercontent.com/ishaberry/Covid19Canada/master/timeseries_canada/cases_timeseries_canada.csv")
-        df_cases.rename(columns={"date_report":"date"},inplace=True)
-    elif loc == 'prov' or loc in data.keys_prov.keys():
-        df_cases = cases_prov = pd.read_csv("https://raw.githubusercontent.com/ishaberry/Covid19Canada/master/timeseries_prov/cases_timeseries_prov.csv")
-        df_cases.rename(columns={"date_report":"date"},inplace=True)
-    elif loc == 'hr' or loc in data.keys_hr.keys():
-        df_cases = cases_hr = pd.read_csv("https://raw.githubusercontent.com/ishaberry/Covid19Canada/master/timeseries_hr/cases_timeseries_hr.csv")
-        df_cases.rename(columns={"date_report":"date"},inplace=True)
-    else:
-        return "Record not found", 404
-
-    if loc == 'canada':
-        df_mortality = mortality_can = pd.read_csv("https://raw.githubusercontent.com/ishaberry/Covid19Canada/master/timeseries_canada/mortality_timeseries_canada.csv")
-        df_mortality.rename(columns={"date_death_report":"date"},inplace=True)
-    elif loc == 'prov' or loc in data.keys_prov.keys():
-        df_mortality = mortality_prov = pd.read_csv("https://raw.githubusercontent.com/ishaberry/Covid19Canada/master/timeseries_prov/mortality_timeseries_prov.csv")
-        df_mortality.rename(columns={"date_death_report":"date"},inplace=True)
-    elif loc == 'hr' or loc in data.keys_hr.keys():
-        df_mortality = mortality_hr = pd.read_csv("https://raw.githubusercontent.com/ishaberry/Covid19Canada/master/timeseries_hr/mortality_timeseries_hr.csv")
-        df_mortality.rename(columns={"date_death_report":"date"},inplace=True)
-    else:
-        return "Record not found", 404
-
-    if loc == 'canada':
-        df_recovered = recovered_can = pd.read_csv("https://raw.githubusercontent.com/ishaberry/Covid19Canada/master/timeseries_canada/recovered_timeseries_canada.csv")
-        df_recovered.rename(columns={"date_recovered":"date"},inplace=True)
-    elif loc == 'prov' or loc in data.keys_prov.keys():
-        df_recovered = recovered_prov = pd.read_csv("https://raw.githubusercontent.com/ishaberry/Covid19Canada/master/timeseries_prov/recovered_timeseries_prov.csv")
-        df_recovered.rename(columns={"date_recovered":"date"},inplace=True)    
-
-    if loc == 'canada':
-        df_testing = testing_can = pd.read_csv("https://raw.githubusercontent.com/ishaberry/Covid19Canada/master/timeseries_canada/testing_timeseries_canada.csv")
-        df_testing.rename(columns={"date_testing":"date"},inplace=True)
-    elif loc == 'prov' or loc in data.keys_prov.keys():
-        df_testing = testing_prov = pd.read_csv("https://raw.githubusercontent.com/ishaberry/Covid19Canada/master/timeseries_prov/testing_timeseries_prov.csv")
-        df_testing.rename(columns={"date_testing":"date"},inplace=True)
-
-    if loc == 'canada':
-        df_active = active_can = pd.read_csv("https://raw.githubusercontent.com/ishaberry/Covid19Canada/master/timeseries_canada/active_timeseries_canada.csv")
-        df_active.rename(columns={"date_active":"date"},inplace=True)
-        df_active = df_active[['province', 'date', 'active_cases', 'active_cases_change']]
-    elif loc == 'prov' or loc in data.keys_prov.keys():
-        df_active = active_prov = pd.read_csv("https://raw.githubusercontent.com/ishaberry/Covid19Canada/master/timeseries_prov/active_timeseries_prov.csv")
-        df_active.rename(columns={"date_active":"date"},inplace=True)
-        df_active = df_active[['province', 'date', 'active_cases', 'active_cases_change']]     
-
-    if loc == 'canada':
-        df_avaccine = avaccine_can = pd.read_csv("https://raw.githubusercontent.com/ishaberry/Covid19Canada/master/timeseries_canada/vaccine_administration_timeseries_canada.csv")
-        df_avaccine.rename(columns={"date_vaccine_administered":"date"},inplace=True)
-    elif loc == 'prov' or loc in data.keys_prov.keys():
-        df_avaccine = avaccine_prov = pd.read_csv("https://raw.githubusercontent.com/ishaberry/Covid19Canada/master/timeseries_prov/vaccine_administration_timeseries_prov.csv")
-        df_avaccine.rename(columns={"date_vaccine_administered":"date"},inplace=True)
-
-    if loc == 'canada':
-        df_dvaccine = dvaccine_can = pd.read_csv("https://raw.githubusercontent.com/ishaberry/Covid19Canada/master/timeseries_canada/vaccine_distribution_timeseries_canada.csv")
-        df_dvaccine.rename(columns={"date_vaccine_distributed":"date"},inplace=True)
-    elif loc == 'prov' or loc in data.keys_prov.keys():
-        df_dvaccine = dvaccine_prov = pd.read_csv("https://raw.githubusercontent.com/ishaberry/Covid19Canada/master/timeseries_prov/vaccine_distribution_timeseries_prov.csv")
-        df_dvaccine.rename(columns={"date_vaccine_distributed":"date"},inplace=True)
     
-    if loc == 'hr' or loc in data.keys_hr.keys():
-        df_tomerge = [df_cases, df_mortality]
-        df_final = reduce(lambda left, right: pd.merge(left, right, on=['date', 'province', 'health_region'], how='outer'), df_tomerge)
+    # subset dataframes according to location
+    if loc == 'canada':
+        dfs = {k: data.ccodwg[k] for k in data_canada}
+    elif loc == 'prov' or loc in data.keys_prov.keys():
+        dfs = {k: data.ccodwg[k] for k in data_prov}
+    elif loc == 'hr' or loc in data.keys_hr.keys():
+        dfs = {k: data.ccodwg[k] for k in data_hr}
     else:
-        df_tomerge = [df_cases, df_mortality, df_recovered, df_testing, df_active, df_avaccine, df_dvaccine]
-        df_final = reduce(lambda left, right: pd.merge(left, right, on=['date', 'province'], how='outer'), df_tomerge)
-    df_final['date'] = pd.to_datetime(df_final['date'], dayfirst=True)
-    df = df_final.fillna("NULL")
-
-    if loc:
-        if loc == 'canada':
-            df
-        elif loc == 'prov':
-            df
-        elif loc == 'hr':
-            df
-        elif loc in data.keys_prov.keys():
-            df = df.loc[df.province == data.keys_prov[loc]['province']]
-        elif loc in data.keys_hr.keys():
-            df = df.loc[df.health_region == data.keys_hr[loc]['health_region']]
-            if loc != '9999':
-                df = df.loc[df.province == data.keys_hr[loc]['province']]
-
+        return "Record not found", 404    
+    
+    # rename date columns
+    for df in dfs.values():
+        df.columns = df.columns.str.replace('^date_.*', 'date')
+    
+    # subset active dataframe to avoid duplicate columns
+    if loc == 'canada':
+        dfs['active_timeseries_canada'] = dfs['active_timeseries_canada'].drop(columns=['cumulative_cases',
+                                                                                        'cumulative_recovered',
+                                                                                        'cumulative_deaths'])
+    elif loc == 'prov' or loc in data.keys_prov.keys():
+        dfs['active_timeseries_prov'] = dfs['active_timeseries_prov'].drop(columns=['cumulative_cases',
+                                                                                    'cumulative_recovered',
+                                                                                    'cumulative_deaths'])
+    
+    # merge dataframes
+    df = reduce(lambda left, right: pd.merge(left, right, on=['date', 'province'], how='outer'), dfs.values())
+    
+    # convert dates and filter to most recent date
+    df['date'] = pd.to_datetime(df['date'], dayfirst=True)
+    
+    # filter by location
+    if loc in data.keys_prov.keys():
+        df = df.loc[df.province == data.keys_prov[loc]['province']]
+    elif loc in data.keys_hr.keys():
+        df = df.loc[df.health_region == data.keys_hr[loc]['health_region']]
+        if loc != '9999':
+            df = df.loc[df.province == data.keys_hr[loc]['province']]    
+    
+    # filter by date
     if date:
         df = df.loc[df.date == date]
-
     if after:
         df = df.loc[df.date >= after]
-
     if before:
         df = df.loc[df.date <= before]
-
-    if version:
-        if version=='true':
-            version = pd.read_csv("https://raw.githubusercontent.com/ishaberry/Covid19Canada/master/update_time.txt", sep="\t", header=None)
-            response["version"] = version.head().values[0][0]
     
-    if ymd and ymd=='true':
+    # format output
+    if ymd == 'true':
         df['date'] = df.date.dt.strftime('%Y-%m-%d')
     else:
         df['date'] = df.date.dt.strftime('%d-%m-%Y')
-    response["summary"] = df.to_dict(orient='records')
-
+    df = df.fillna('NULL')
+    response['summary'] = df.to_dict(orient='records')  
+    
+    # add version to response
+    if version == 'true':
+        response['version'] = data.version['version']
+    
+    # return response
     return response
 
 @app.route('/version')
 def version():
+    
+    # initialize response
     response = {}
-    version = pd.read_csv("https://raw.githubusercontent.com/ishaberry/Covid19Canada/master/update_time.txt", sep="\t", header=None)
-    response["version"] = version.head().values[0][0]
+    
+    # get version
+    response['version'] = data.version['version']
+    
+    # return response
     return response
