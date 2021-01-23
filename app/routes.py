@@ -39,8 +39,6 @@ def index():
     
     # convert dates and filter to most recent date
     df['date'] = pd.to_datetime(df['date'], dayfirst=True)
-    print(type(data.version['date']))
-    print(type(df['date']))
     df = df.loc[df['date'] == data.version['date']]
     
     # format output
@@ -181,10 +179,13 @@ def individual():
 
 @app.route('/timeseries')
 def timeseries():
+    
+    # read arguments
     stat = request.args.get('stat')
     loc = request.args.get('loc')
     date = request.args.get('date')
     ymd = request.args.get('ymd')
+    
     if date:
         try:
             date = datetime.strptime(date, '%d-%m-%Y')
