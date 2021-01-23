@@ -1,63 +1,57 @@
-from app import app
-from flask import request
+# import app components
+from app import app, data
 from flask_cors import CORS
+CORS(app) # enable CORS for all routes
+
+# import libraries
+from flask import request
 import pandas as pd
 from datetime import datetime
 from functools import reduce
-CORS(app) # enable CORS for all routes
-
-province = pd.read_csv("https://raw.githubusercontent.com/ishaberry/Covid19Canada/master/other/prov_map.csv")[['province_short', 'province']].set_index(['province_short']).to_dict('index')
-health_region = pd.read_csv("https://raw.githubusercontent.com/ishaberry/Covid19Canada/master/other/hr_map.csv")[['HR_UID', 'province', 'health_region']]
-health_region.loc[health_region.HR_UID == 9999, "province"] = "All Provinces"
-health_region = health_region.drop_duplicates().set_index(['HR_UID'])
-health_region.index = health_region.index.map(str)
-health_region = health_region.to_dict('index')
 
 @app.route('/')
 @app.route('/index')
 def index():
     dfs = []
     response = {}
-
-    version_df = pd.read_csv("https://raw.githubusercontent.com/ishaberry/Covid19Canada/master/update_time.txt", sep="\t", header=None)
-    datetime_str = version_df.head().values[0][0].split(' ')[0]
-    date = datetime.strptime(datetime_str, '%Y-%m-%d')
     
-    df_cases = pd.read_csv("https://raw.githubusercontent.com/ishaberry/Covid19Canada/master/timeseries_canada/cases_timeseries_canada.csv")
-    df_cases.rename(columns={"date_report":"date"},inplace=True)
-
-    df_mortality = pd.read_csv("https://raw.githubusercontent.com/ishaberry/Covid19Canada/master/timeseries_canada/mortality_timeseries_canada.csv")
-    df_mortality.rename(columns={"date_death_report":"date"},inplace=True)
-
-    df_recovered = pd.read_csv("https://raw.githubusercontent.com/ishaberry/Covid19Canada/master/timeseries_canada/recovered_timeseries_canada.csv")
-    df_recovered.rename(columns={"date_recovered":"date"},inplace=True)
-
-    df_testing = pd.read_csv("https://raw.githubusercontent.com/ishaberry/Covid19Canada/master/timeseries_canada/testing_timeseries_canada.csv")
-    df_testing.rename(columns={"date_testing":"date"},inplace=True)
-
-    df_active = pd.read_csv("https://raw.githubusercontent.com/ishaberry/Covid19Canada/master/timeseries_canada/active_timeseries_canada.csv")
-    df_active.rename(columns={"date_active":"date"},inplace=True)
-    df_active = df_active[['province', 'date', 'active_cases','active_cases_change']]
+    # subset dataframes
+    dfs = {k: data.ccodwg[k] for k in ('cases_timeseries_canada',
+                                       'mortality_timeseries_canada',
+                                       'recovered_timeseries_canada',
+                                       'testing_timeseries_canada',
+                                       'active_timeseries_canada',
+                                       'vaccine_administration_timeseries_canada',
+                                       'vaccine_distribution_timeseries_canada',
+                                       'vaccine_completion_timeseries_canada')}
     
-    df_avaccine = pd.read_csv("https://raw.githubusercontent.com/ishaberry/Covid19Canada/master/timeseries_canada/vaccine_administration_timeseries_canada.csv")
-    df_avaccine.rename(columns={"date_vaccine_administered":"date"},inplace=True)
+    # rename date columns
+    for df in dfs.values():
+        df.columns = df.columns.str.replace('^date_.*', 'date')
     
-    df_dvaccine = pd.read_csv("https://raw.githubusercontent.com/ishaberry/Covid19Canada/master/timeseries_canada/vaccine_distribution_timeseries_canada.csv")
-    df_dvaccine.rename(columns={"date_vaccine_distributed":"date"},inplace=True)
+    # subset active dataframe to avoid duplicate columns
+    dfs['active_timeseries_canada'] = dfs['active_timeseries_canada'].drop(columns=['cumulative_cases',
+                                                                                   'cumulative_recovered',
+                                                                                   'cumulative_deaths'])
     
-    df_tomerge = [df_cases, df_mortality, df_recovered, df_testing, df_active, df_avaccine, df_dvaccine]
-    df_final = reduce(lambda left, right: pd.merge(left, right, on=['date', 'province'], how='outer'), df_tomerge)
-    df_final['date'] = pd.to_datetime(df_final['date'], dayfirst=True)
-    df = df_final.fillna("NULL")
-
-    df = df.loc[df.date == date]
+    # merge dataframes
+    df = reduce(lambda left, right: pd.merge(left, right, on=['date', 'province'], how='outer'), dfs.values())
     
-    version = pd.read_csv("https://raw.githubusercontent.com/ishaberry/Covid19Canada/master/update_time.txt", sep="\t", header=None)
-    response["version"] = version.head().values[0][0]
-
-    df['date'] = df.date.dt.strftime('%d-%m-%Y')
-    response["summary"] = df.to_dict(orient='records')
-
+    # convert dates and filter to most recent date
+    df['date'] = pd.to_datetime(df['date'], dayfirst=True)
+    print(type(data.version['date']))
+    print(type(df['date']))
+    df = df.loc[df['date'] == data.version['date']]
+    
+    # format output
+    df['date'] = df['date'].dt.strftime('%d-%m-%Y')  
+    df = df.fillna('NULL')
+    response['summary'] = df.to_dict(orient='records')  
+    
+    # add version to response
+    response['version'] = data.version['version']
+    
+    # return response
     return response
 
 @app.route('/individual')
