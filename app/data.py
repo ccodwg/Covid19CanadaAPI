@@ -2,6 +2,7 @@
 from flask import Flask
 from apscheduler.schedulers.background import BackgroundScheduler
 import os
+import shutil
 import glob
 from datetime import datetime
 import pandas as pd
@@ -58,7 +59,10 @@ def update_data():
 
 # initial clone of data repository
 print('Cloning from CCODWG repository...')
-os.mkdir('data')
+path_data = 'data'
+if os.path.isdir(path_data):
+    shutil.rmtree(path_data)
+os.mkdir(path_data)
 git.Repo.clone_from('https://github.com/ccodwg/Covid19Canada.git', 'data', branch='master', depth=1)
 print('Clone complete. Reading in data...')
 load_data()
