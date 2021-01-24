@@ -213,7 +213,7 @@ def timeseries():
     elif loc == 'hr' or loc in data.keys_hr.keys():
         if stat == 'cases':
             data_name = data_hr[0]
-            resp_name = data_names[1]
+            resp_name = data_names[0]
             dfs = data.ccodwg[data_name]
         elif stat == 'mortality':
             data_name = data_hr[1]
