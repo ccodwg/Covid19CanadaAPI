@@ -24,24 +24,42 @@ def date_arg(arg):
     return arg
 
 # list of dataset by location
-data_canada = ('cases_timeseries_canada',
+data_canada = ['cases_timeseries_canada',
                'mortality_timeseries_canada',
                'recovered_timeseries_canada',
                'testing_timeseries_canada',
                'active_timeseries_canada',
                'vaccine_administration_timeseries_canada',
                'vaccine_distribution_timeseries_canada',
-               'vaccine_completion_timeseries_canada')
-data_prov = ('cases_timeseries_prov',
+               'vaccine_completion_timeseries_canada']
+data_prov = ['cases_timeseries_prov',
             'mortality_timeseries_prov',
             'recovered_timeseries_prov',
             'testing_timeseries_prov',
             'active_timeseries_prov',
             'vaccine_administration_timeseries_prov',
             'vaccine_distribution_timeseries_prov',
-            'vaccine_completion_timeseries_prov')
-data_hr = ('cases_timeseries_hr',
-           'mortality_timeseries_hr')
+            'vaccine_completion_timeseries_prov']
+data_hr = ['cases_timeseries_hr',
+           'mortality_timeseries_hr']
+data_names = ['cases',
+              'mortality',
+              'recovered',
+              'testing',
+              'active',
+              'avaccine',
+              'dvaccine',
+              'cvaccine']
+data_names_dates = {
+    'date_report': 'cases',
+    'date_death_report': 'mortality',
+    'date_recovered': 'recovered',
+    'date_testing': 'testing',
+    'date_active': 'active',
+    'date_vaccine_administered': 'avaccine',
+    'date_vaccine_distributed': 'dvaccine',
+    'date_vaccine_completed': 'cvaccine'
+}
 
 @app.route('/')
 @app.route('/index')
@@ -124,65 +142,83 @@ def timeseries():
     # get dataframes
     if loc == 'canada':
         if stat == 'cases':
-            resp_name = data_canada[0]
-            dfs = data.ccodwg[resp_name]
+            data_name = data_canada[0]
+            resp_name = data_names[0]
+            dfs = data.ccodwg[data_name]
         elif stat == 'mortality':
-            resp_name = data_canada[1]
-            dfs = data.ccodwg[resp_name]
+            data_name = data_canada[1]
+            resp_name = data_names[1]
+            dfs = data.ccodwg[data_name]
         elif stat == 'recovered':
-            resp_name = data_canada[2]
-            dfs = data.ccodwg[resp_name]
+            data_name = data_canada[2]
+            resp_name = data_names[2]
+            dfs = data.ccodwg[data_name]
         elif stat == 'testing':
-            resp_name = data_canada[3]
-            dfs = data.ccodwg[resp_name]
+            data_name = data_canada[3]
+            resp_name = data_names[3]
+            dfs = data.ccodwg[data_name]
         elif stat == 'active':
-            resp_name = data_canada[4]
-            dfs = data.ccodwg[resp_name]
+            data_name = data_canada[4]
+            resp_name = data_names[4]
+            dfs = data.ccodwg[data_name]
         elif stat == 'avaccine':
-            resp_name = data_canada[5]
-            dfs = data.ccodwg[resp_name]
+            data_name = data_canada[5]
+            resp_name = data_names[5]
+            dfs = data.ccodwg[data_name]
         elif stat == 'dvaccine':
-            resp_name = data_canada[6]
-            dfs = data.ccodwg[resp_name]
+            data_name = data_canada[6]
+            resp_name = data_names[6]
+            dfs = data.ccodwg[data_name]
         elif stat == 'cvaccine':
-            resp_name = data_canada[7]
-            dfs = data.ccodwg[resp_name]
+            data_name = data_canada[7]
+            resp_name = data_names[7]
+            dfs = data.ccodwg[data_name]
         else:
             dfs = {k: data.ccodwg[k] for k in data_canada}
     elif loc == 'prov' or loc in data.keys_prov.keys():
         if stat == 'cases':
-            resp_name = data_prov[0]
-            dfs = data.ccodwg[resp_name]
+            data_name = data_prov[0]
+            resp_name = data_names[0]
+            dfs = data.ccodwg[data_name]
         elif stat == 'mortality':
-            resp_name = data_prov[1]
-            dfs = data.ccodwg[resp_name]
+            data_name = data_prov[1]
+            resp_name = data_names[1]
+            dfs = data.ccodwg[data_name]
         elif stat == 'recovered':
-            resp_name = data_prov[2]
-            dfs = data.ccodwg[resp_name]
+            data_name = data_prov[2]
+            resp_name = data_names[2]
+            dfs = data.ccodwg[data_name]
         elif stat == 'testing':
-            resp_name = data_prov[3]
-            dfs = data.ccodwg[resp_name]
+            data_name = data_prov[3]
+            resp_name = data_names[3]
+            dfs = data.ccodwg[data_name]
         elif stat == 'active':
-            resp_name = data_prov[4]
-            dfs = data.ccodwg[resp_name]
+            data_name = data_prov[4]
+            resp_name = data_names[4]
+            dfs = data.ccodwg[data_name]
         elif stat == 'avaccine':
-            resp_name = data_prov[5]
-            dfs = data.ccodwg[resp_name]
+            data_name = data_prov[5]
+            resp_name = data_names[5]
+            dfs = data.ccodwg[data_name]
         elif stat == 'dvaccine':
-            resp_name = data_prov[6]
-            dfs = data.ccodwg[resp_name]
+            data_name = data_prov[6]
+            resp_name = data_names[6]
+            dfs = data.ccodwg[data_name]
         elif stat == 'cvaccine':
-            resp_name = data_prov[7]
-            dfs = data.ccodwg[resp_name]
+            data_name = data_prov[7]
+            resp_name = data_names[7]
+            dfs = data.ccodwg[data_name]
         else:
             dfs = {k: data.ccodwg[k] for k in data_prov}
     elif loc == 'hr' or loc in data.keys_hr.keys():
         if stat == 'cases':
-            resp_name = data_hr[0]
-            dfs = data.ccodwg[resp_name]
+            data_name = data_hr[0]
+            resp_name = data_names[1]
+            dfs = data.ccodwg[data_name]
         elif stat == 'mortality':
-            resp_name = data_hr[1]
-            dfs = data.ccodwg[resp_name]
+            data_name = data_hr[1]
+            resp_name = data_names[1]
+            dfs = data.ccodwg[data_name]
         else:
             dfs = {k: data.ccodwg[k] for k in data_hr}
     else:
@@ -224,7 +260,12 @@ def timeseries():
             else:
                 dfs[k][col_date] = dfs[k][col_date].dt.strftime('%d-%m-%Y')
             dfs[k] = dfs[k].fillna('NULL')
-            response[k] = dfs[k].to_dict(orient='records')        
+            
+            # get response name
+            resp_name = data_names_dates[col_date]
+            
+            # write response
+            response[resp_name] = dfs[k].to_dict(orient='records')        
     else:
         
         # determine date column
