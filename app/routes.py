@@ -275,10 +275,9 @@ def timeseries():
         if loc in data.keys_prov.keys():
             dfs = dfs.loc[dfs['province'] == data.keys_prov[loc]['province']]
         elif loc in data.keys_hr.keys():
-            for k in dfs.keys():
-                dfs = dfs.loc[dfs['health_region'] == data.keys_hr[loc]['health_region']]
-                if loc != '9999':
-                    dfs = dfs.loc[dfs['province'] == data.keys_hr[loc]['province']]         
+            dfs = dfs.loc[dfs['health_region'] == data.keys_hr[loc]['health_region']]
+            if loc != '9999':
+                dfs = dfs.loc[dfs['province'] == data.keys_hr[loc]['province']]         
         
         # convert date column
         dfs[col_date] = pd.to_datetime(dfs[col_date], dayfirst=True)
@@ -360,7 +359,10 @@ def summary():
                                                                                     'cumulative_deaths'])
     
     # merge dataframes
-    df = reduce(lambda left, right: pd.merge(left, right, on=['date', 'province'], how='outer'), dfs.values())
+    if loc == 'hr' or loc in data.keys_hr.keys():
+        df = reduce(lambda left, right: pd.merge(left, right, on=['date', 'province', 'health_region'], how='outer'), dfs.values())
+    else:
+        df = reduce(lambda left, right: pd.merge(left, right, on=['date', 'province'], how='outer'), dfs.values())
     
     # convert dates column
     df['date'] = pd.to_datetime(df['date'], dayfirst=True)
@@ -370,6 +372,7 @@ def summary():
         df = df.loc[df['province'] == data.keys_prov[loc]['province']]
     elif loc in data.keys_hr.keys():
         df = df.loc[df['health_region'] == data.keys_hr[loc]['health_region']]
+        print("HI")
         if loc != '9999':
             df = df.loc[df['province'] == data.keys_hr[loc]['province']]
     
