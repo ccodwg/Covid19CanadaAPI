@@ -38,19 +38,19 @@ def load_data(temp_dir):
     version['date'] = pd.to_datetime(version['version'].split()[0])
 
 ## update data
-def update_data():
+def update_data(temp_dir):
     
     ## make data available globally
     global ccodwg, keys_prov, keys_hr, version
     
     ## git pull
     print('Pulling from CCODWG repository...')
-    repo = git.Git('data')
+    repo = git.Git(temp_dir.name)
     repo.pull('origin', 'master')
     
     ### read in updated data if version has changed
     print('Checking if data have changed...')
-    if (pd.read_csv('data/update_time.txt', sep="\t", header=None).head().values[0][0] != version['version']):
+    if (pd.read_csv(os.path.join(temp_dir.name, 'update_time.txt'), sep="\t", header=None).head().values[0][0] != version['version']):
         print('Data have changed. Reloading files...')
         load_data(temp_dir)
         print('Data have been updated.')
@@ -67,5 +67,5 @@ print('Data are ready.')
 
 # check for data updates every 5 minutes
 scheduler = BackgroundScheduler()
-job = scheduler.add_job(update_data, 'interval', minutes=5)
+job = scheduler.add_job(update_data, 'interval', minutes=5, args=[temp_dir])
 scheduler.start()
