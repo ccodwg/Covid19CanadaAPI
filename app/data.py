@@ -2,22 +2,22 @@
 from flask import Flask
 from apscheduler.schedulers.background import BackgroundScheduler
 import os
-import shutil
 import glob
 from datetime import datetime
 import pandas as pd
+import tempfile
 import git
 
 # define functions
 
 ## read in data
-def load_data():
+def load_data(temp_dir):
     
     ## make data available globally
     global ccodwg, keys_prov, keys_hr, version
     
     ## list data files
-    files = glob.glob('data/**/*.csv', recursive=True)
+    files = glob.glob(temp_dir.name + '/**/*.csv', recursive=True)
     filenames = [os.path.splitext(os.path.basename(f))[0] for f in files]
     
     ## create dictionary of dataframes
@@ -34,7 +34,7 @@ def load_data():
     
     ## read in version - full string and date only
     version = dict.fromkeys(['version', 'date'])
-    version['version'] = pd.read_csv('data/update_time.txt', sep='\t', header=None).head().values[0][0]
+    version['version'] = pd.read_csv(os.path.join(temp_dir.name, 'update_time.txt'), sep='\t', header=None).head().values[0][0]
     version['date'] = pd.to_datetime(version['version'].split()[0])
 
 ## update data
@@ -52,20 +52,17 @@ def update_data():
     print('Checking if data have changed...')
     if (pd.read_csv('data/update_time.txt', sep="\t", header=None).head().values[0][0] != version['version']):
         print('Data have changed. Reloading files...')
-        load_data()
+        load_data(temp_dir)
         print('Data have been updated.')
     else:
         print('Data have not changed. No action required.')
 
 # initial clone of data repository
 print('Cloning from CCODWG repository...')
-path_data = 'data'
-if os.path.isdir(path_data):
-    shutil.rmtree(path_data)
-os.mkdir(path_data)
-git.Repo.clone_from('https://github.com/ccodwg/Covid19Canada.git', 'data', branch='master', depth=1)
+temp_dir = tempfile.TemporaryDirectory()
+git.Repo.clone_from('https://github.com/ccodwg/Covid19Canada.git', temp_dir.name, branch='master', depth=1)
 print('Clone complete. Reading in data...')
-load_data()
+load_data(temp_dir)
 print('Data are ready.')
 
 # check for data updates every 5 minutes
