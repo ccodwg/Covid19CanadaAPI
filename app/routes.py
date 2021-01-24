@@ -284,7 +284,6 @@ def timeseries():
         
         # filter by date
         if date:
-            df = df.loc[df['date'] == date]
             dfs = dfs.loc[dfs[col_date] == date]
         if after:
             dfs = dfs.loc[dfs[col_date] >= after]
