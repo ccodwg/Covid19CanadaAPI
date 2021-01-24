@@ -83,127 +83,16 @@ def index():
 @app.route('/individual')
 def individual():
     return "Individual level data return is temporarily disabled, please download from GitHub: https://github.com/ccodwg/Covid19Canada", 404
+    
+    ## initialize response
+    #response = {}
+    
+    ## read arguments
     #stat = request.args.get('stat')
     #loc = request.args.get('loc')
     #date = request.args.get('date')
     #ymd = request.args.get('ymd')
     #extra = request.args.get('extra')
-    #if date:
-        #try:
-            #date = datetime.strptime(date, '%d-%m-%Y')
-        #except:
-            #try:
-                #date = datetime.strptime(date, '%Y-%m-%d')
-            #except:
-                #date = None
-    #after = request.args.get('after')
-    #if after:
-        #try:
-            #after = datetime.strptime(after, '%d-%m-%Y')
-        #except:
-            #try:
-                #after = datetime.strptime(after, '%Y-%m-%d')
-            #except:
-                #after = None
-    #before = request.args.get('before')
-    #if before:
-        #try:
-            #before = datetime.strptime(before, '%d-%m-%Y')
-        #except:
-            #try:
-                #before = datetime.strptime(before, '%Y-%m-%d')
-            #except:
-                #before = None
-    #version = request.args.get('version')
-    #dfs = []
-    #response = {}
-    #if stat == 'cases':
-        #cases = pd.read_csv("https://raw.githubusercontent.com/ishaberry/Covid19Canada/master/cases.csv")
-        #cases['date_report'] = pd.to_datetime(cases['date_report'],dayfirst=True)
-        #cases['report_week'] = pd.to_datetime(cases['report_week'],dayfirst=True)
-        #if extra and extra=='false':
-            #pass
-        #else:
-            #case_source = pd.read_csv("https://raw.githubusercontent.com/ishaberry/Covid19Canada/master/other/cases_extra/cases_case_source.csv")[['case_source_short', 'case_source_full']]
-            #cases = cases.merge(case_source, left_on='case_source', right_on='case_source_short', how='left').drop(columns=['case_source', 'case_source_short']).rename(columns={'case_source_full': 'case_source'})
-        #dfs.append(cases)
-    #elif stat =='mortality':
-        #mortality = pd.read_csv("https://raw.githubusercontent.com/ishaberry/Covid19Canada/master/mortality.csv")
-        #mortality['date_death_report'] = pd.to_datetime(mortality['date_death_report'],dayfirst=True)
-        #if extra and extra=='false':
-            #pass
-        #else:
-            #death_source = pd.read_csv("https://raw.githubusercontent.com/ishaberry/Covid19Canada/master/other/mortality_extra/mortality_death_source.csv")[['death_source_short', 'death_source_full']]
-            #mortality = mortality.merge(death_source, left_on='death_source', right_on='death_source_short', how='left').drop(columns=['death_source', 'death_source_short']).rename(columns={'death_source_full': 'death_source'})
-        #dfs.append(mortality)
-    #else:
-        #cases = pd.read_csv("https://raw.githubusercontent.com/ishaberry/Covid19Canada/master/cases.csv")
-        #mortality = pd.read_csv("https://raw.githubusercontent.com/ishaberry/Covid19Canada/master/mortality.csv")
-        #cases['date_report'] = pd.to_datetime(cases['date_report'],dayfirst=True)
-        #mortality['date_death_report'] = pd.to_datetime(mortality['date_death_report'],dayfirst=True)
-        #if extra and extra=='false':
-            #pass
-        #else:
-            #case_source = pd.read_csv("https://raw.githubusercontent.com/ishaberry/Covid19Canada/master/other/cases_extra/cases_case_source.csv")[['case_source_short', 'case_source_full']]
-            #cases = cases.merge(case_source, left_on='case_source', right_on='case_source_short', how='left').drop(columns=['case_source', 'case_source_short']).rename(columns={'case_source_full': 'case_source'})
-            #death_source = pd.read_csv("https://raw.githubusercontent.com/ishaberry/Covid19Canada/master/other/mortality_extra/mortality_death_source.csv")[['death_source_short', 'death_source_full']]
-            #mortality = mortality.merge(death_source, left_on='death_source', right_on='death_source_short', how='left').drop(columns=['death_source', 'death_source_short']).rename(columns={'death_source_full': 'death_source'})
-        #dfs.append(cases)
-        #dfs.append(mortality)
-    #for df in dfs:
-
-        #df = df.fillna("NULL")
-
-        #if loc:
-            #if loc in data.keys_prov.keys():
-                #df = df.loc[df['province'] == data.keys_prov[loc]['province']]
-            #elif loc in data.keys_hr.keys():
-                #df = df.loc[df['health_region'] == data.keys_hr[loc]['health_region']]
-                #if loc != '9999':
-                    #df = df.loc[df['province'] == data.keys_hr[loc]['province']]
-
-        #if date:
-            #if 'date_report' in df.columns:
-                #df = df.loc[df['date']_report == date]
-            #if 'date_death_report' in df.columns:
-                #df = df.loc[df['date']_death_report == date]
-
-        #if after:
-            #if 'date_report' in df.columns:
-                #df = df.loc[df['date']_report >= after]
-            #if 'date_death_report' in df.columns:
-                #df = df.loc[df['date']_death_report >= after]
-
-        #if before:
-            #if 'date_report' in df.columns:
-                #df = df.loc[df['date']_report <= before]
-            #if 'date_death_report' in df.columns:
-                #df = df.loc[df['date']_death_report <= before]
-        
-        #if version:
-            #if version=='true':
-                #version = pd.read_csv("https://raw.githubusercontent.com/ishaberry/Covid19Canada/master/update_time.txt", sep="\t", header=None)
-                #response["version"] = version.head().values[0][0]
-
-        #if 'date_report' in df.columns:
-            #if ymd and ymd=='true':
-                #df['date_report'] = df['date']_report.dt.strftime('%Y-%m-%d')
-                #df['report_week'] = df.report_week.dt.strftime('%Y-%m-%d')
-            #else:
-                #df['date_report'] = df['date']_report.dt.strftime('%d-%m-%Y')
-                #df['report_week'] = df.report_week.dt.strftime('%d-%m-%Y')
-        #if 'date_death_report' in df.columns:
-            #if ymd and ymd=='true':
-                #df['date_death_report'] = df['date']_death_report.dt.strftime('%Y-%m-%d')
-            #else:
-                #df['date_death_report'] = df['date']_death_report.dt.strftime('%d-%m-%Y')
-
-        #if 'date_report' in df.columns:
-            #response["cases"] = df.to_dict(orient='records')
-        #if 'date_death_report' in df.columns:
-            #response["mortality"] = df.to_dict(orient='records')
-
-    #return response
 
 @app.route('/timeseries')
 def timeseries():
