@@ -50,7 +50,7 @@ def update_data():
     
     ### read in updated data if version has changed
     print('Checking if data have changed...')
-    if (pd.read_csv('data/update_time.txt', sep="\t", header=None).head().values[0][0] != version):
+    if (pd.read_csv('data/update_time.txt', sep="\t", header=None).head().values[0][0] != version['version']):
         print('Data have changed. Reloading files...')
         load_data()
         print('Data have been updated.')
