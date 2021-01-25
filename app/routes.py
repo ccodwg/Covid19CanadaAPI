@@ -76,12 +76,12 @@ data_names_dates = {
     'date_vaccine_distributed': 'dvaccine',
     'date_vaccine_completed': 'cvaccine'
 }
-data_other = [
-    'prov_map',
-    'hr_map',
-    'age_map_cases',
-    'age_map_mortality'
-]
+data_other = {
+    'prov': 'prov_map',
+    'hr': 'hr_map',
+    'age_cases': 'age_map_cases',
+    'age_mortality': 'age_map_mortality'
+}
 
 @app.route('/')
 @app.route('/index')
@@ -153,35 +153,27 @@ def timeseries():
     if loc == 'canada':
         if stat == 'cases':
             data_name = data_canada[0]
-            resp_name = data_names[0]
             dfs = [pd.read_csv(data.ccodwg[data_name])]
         elif stat == 'mortality':
             data_name = data_canada[1]
-            resp_name = data_names[1]
             dfs = [pd.read_csv(data.ccodwg[data_name])]
         elif stat == 'recovered':
             data_name = data_canada[2]
-            resp_name = data_names[2]
             dfs = [pd.read_csv(data.ccodwg[data_name])]
         elif stat == 'testing':
             data_name = data_canada[3]
-            resp_name = data_names[3]
             dfs = [pd.read_csv(data.ccodwg[data_name])]
         elif stat == 'active':
             data_name = data_canada[4]
-            resp_name = data_names[4]
             dfs = [pd.read_csv(data.ccodwg[data_name])]
         elif stat == 'avaccine':
             data_name = data_canada[5]
-            resp_name = data_names[5]
             dfs = [pd.read_csv(data.ccodwg[data_name])]
         elif stat == 'dvaccine':
             data_name = data_canada[6]
-            resp_name = data_names[6]
             dfs = [pd.read_csv(data.ccodwg[data_name])]
         elif stat == 'cvaccine':
             data_name = data_canada[7]
-            resp_name = data_names[7]
             dfs = [pd.read_csv(data.ccodwg[data_name])]
         else:
             dfs = {k: pd.read_csv(data.ccodwg[k]) for k in data_canada}
@@ -189,35 +181,27 @@ def timeseries():
     elif loc == 'prov' or loc in data.keys_prov.keys():
         if stat == 'cases':
             data_name = data_prov[0]
-            resp_name = data_names[0]
             dfs = [pd.read_csv(data.ccodwg[data_name])]
         elif stat == 'mortality':
             data_name = data_prov[1]
-            resp_name = data_names[1]
             dfs = [pd.read_csv(data.ccodwg[data_name])]
         elif stat == 'recovered':
             data_name = data_prov[2]
-            resp_name = data_names[2]
             dfs = [pd.read_csv(data.ccodwg[data_name])]
         elif stat == 'testing':
             data_name = data_prov[3]
-            resp_name = data_names[3]
             dfs = [pd.read_csv(data.ccodwg[data_name])]
         elif stat == 'active':
             data_name = data_prov[4]
-            resp_name = data_names[4]
             dfs = [pd.read_csv(data.ccodwg[data_name])]
         elif stat == 'avaccine':
             data_name = data_prov[5]
-            resp_name = data_names[5]
             dfs = [pd.read_csv(data.ccodwg[data_name])]
         elif stat == 'dvaccine':
             data_name = data_prov[6]
-            resp_name = data_names[6]
             dfs = [pd.read_csv(data.ccodwg[data_name])]
         elif stat == 'cvaccine':
             data_name = data_prov[7]
-            resp_name = data_names[7]
             dfs = [pd.read_csv(data.ccodwg[data_name])]
         else:
             dfs = {k: pd.read_csv(data.ccodwg[k]) for k in data_prov}
@@ -225,11 +209,9 @@ def timeseries():
     elif loc == 'hr' or loc in data.keys_hr.keys():
         if stat == 'cases':
             data_name = data_hr[0]
-            resp_name = data_names[0]
             dfs = [pd.read_csv(data.ccodwg[data_name])]
         elif stat == 'mortality':
             data_name = data_hr[1]
-            resp_name = data_names[1]
             dfs = [pd.read_csv(data.ccodwg[data_name])]
         else:
             dfs = {k: pd.read_csv(data.ccodwg[k]) for k in data_canada}
@@ -319,7 +301,7 @@ def summary():
     elif loc == 'hr' or loc in data.keys_hr.keys():
         dfs = {k: pd.read_csv(data.ccodwg[k]) for k in data_hr}
     else:
-        return "Record not found", 404    
+        return "Record not found", 404
     
     # rename date columns
     for df in dfs.values():
@@ -406,36 +388,42 @@ def other():
     missing_val = missing_arg(missing)
     
     # get dataframes
-    if (stat == 'prov_map'):
-        resp_name = data_other[0]
-        dfs = [pd.read_csv(data.ccodwg[data_other])]
-    elif (stat == 'hr_map'):
-        resp_name = data_other[1]
-        dfs = [pd.read_csv(data.ccodwg[data_other])]
-    elif (stat == 'age_map_cases'):
-        resp_name = data_other[2]
-        dfs = [pd.read_csv(data.ccodwg[data_other])]
-    elif (stat == 'age_map_mortality'):
-        resp_name = data_other[3]
-        dfs = [pd.read_csv(data.ccodwg[data_other])]
-    else:
-        dfs = {k: pd.read_csv(data.ccodwg[k]) for k in data_other}
-        dfs = list(dfs.values()) # convert to list        
-    
-    # format output
-    for i in range(len(dfs)):
-        dfs[i] = dfs[i].fillna(missing_val)
+    if stat:
+        if (stat == 'prov'):
+            dfs = pd.read_csv(data.ccodwg[data_other[stat]])
+        elif (stat == 'hr'):
+            dfs = pd.read_csv(data.ccodwg[data_other[stat]])
+        elif (stat == 'age_cases'):
+            dfs = pd.read_csv(data.ccodwg[data_other[stat]])
+        elif (stat == 'age_mortality'):
+            dfs = pd.read_csv(data.ccodwg[data_other[stat]])
+        else:
+            return "Record not found", 404
+        
+        # format output
+        dfs = dfs.fillna(missing_val)
         
         # determine response name and add dataframe to response
-        resp_name = data_other[i]
-        response[resp_name] = dfs[i].to_dict(orient='records')
+        response[stat] = dfs.to_dict(orient='records')
+        
+    else:
+        dfs = {k: pd.read_csv(data.ccodwg[k]) for k in data_other.values()}
+        dfs = list(dfs.values()) # convert to list        
+        
+        # format output
+        for i in range(len(dfs)):
+            dfs[i] = dfs[i].fillna(missing_val)
+        
+            # determine response name and add dataframe to response
+            resp_name = list(data_other)[i]
+            response[resp_name] = dfs[i].to_dict(orient='records')
     
     # add version to response
     if version == 'true':
         response['version'] = data.version['version']    
     
     # return response
-    return response    
+    return response
 
 @app.route('/version')
 def version():
