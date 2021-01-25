@@ -76,6 +76,12 @@ data_names_dates = {
     'date_vaccine_distributed': 'dvaccine',
     'date_vaccine_completed': 'cvaccine'
 }
+data_other = [
+    'prov_map',
+    'hr_map',
+    'age_map_cases',
+    'age_map_mortality'
+]
 
 @app.route('/')
 @app.route('/index')
@@ -400,7 +406,29 @@ def other():
     missing_val = missing_arg(missing)
     
     # get dataframes
+    if (stat == 'prov_map'):
+        resp_name = data_other[0]
+        dfs = [pd.read_csv(data.ccodwg[data_other])]
+    elif (stat == 'hr_map'):
+        resp_name = data_other[1]
+        dfs = [pd.read_csv(data.ccodwg[data_other])]
+    elif (stat == 'age_map_cases'):
+        resp_name = data_other[2]
+        dfs = [pd.read_csv(data.ccodwg[data_other])]
+    elif (stat == 'age_map_mortality'):
+        resp_name = data_other[3]
+        dfs = [pd.read_csv(data.ccodwg[data_other])]
+    else:
+        dfs = {k: pd.read_csv(data.ccodwg[k]) for k in data_other}
+        dfs = list(dfs.values()) # convert to list        
     
+    # format output
+    for i in range(len(dfs)):
+        dfs[i] = dfs[i].fillna(missing_val)
+        
+        # determine response name and add dataframe to response
+        resp_name = data_other[i]
+        response[resp_name] = dfs[i].to_dict(orient='records')
     
     # add version to response
     if version == 'true':
