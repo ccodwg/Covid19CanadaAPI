@@ -23,6 +23,18 @@ def date_arg(arg):
             arg = None
     return arg
 
+## process missing arg
+def missing_arg(missing):
+    if missing == 'na':
+        missing_val = 'NA'    
+    elif missing == 'empty':
+        missing_val = ''
+    elif missing == 'nan':
+        missing_val = 'NaN'
+    else:
+        missing_val = 'NULL'
+    return(missing_val)
+
 ## get date column
 def get_date_col(df):
     return list(filter(re.compile('^date_.*').search, df.columns.values))[0]
@@ -102,21 +114,6 @@ def index():
     # return response
     return response
 
-@app.route('/individual')
-def individual():
-    return "Individual level data return is temporarily disabled, please download from GitHub: https://github.com/ccodwg/Covid19Canada", 404
-    
-    ## initialize response
-    #response = {}
-    
-    ## read arguments
-    #stat = request.args.get('stat')
-    #loc = request.args.get('loc')
-    #date = request.args.get('date')
-    #ymd = request.args.get('ymd')
-    #missing = request.args.get('missing')
-    #extra = request.args.get('extra')
-
 @app.route('/timeseries')
 def timeseries():
     
@@ -142,12 +139,7 @@ def timeseries():
         before = date_arg(before)
     
     # process other arguments
-    if missing == 'empty':
-        missing_val = ''
-    elif missing == 'na':
-        missing_val = 'NA'
-    else:
-        missing_val = 'NULL'
+    missing_val = missing_arg(missing)
     if not loc:
         loc = 'prov'
     
@@ -309,14 +301,7 @@ def summary():
         date = data.version['date']    
         
     # process other arguments
-    if missing == 'empty':
-        missing_val = ''
-    elif missing == 'na':
-        missing_val = 'NA'
-    elif missing == 'nan':
-        missing_val = 'NaN'
-    else:
-        missing_val = 'NULL'
+    missing_val = missing_arg(missing)
     if not loc:
         loc = 'prov'
     
@@ -385,6 +370,20 @@ def summary():
     # return response
     return response
 
+@app.route('/individual')
+def individual():
+    return "Individual level data return is temporarily disabled, please download from GitHub: https://github.com/ccodwg/Covid19Canada", 404
+    
+    ## initialize response
+    #response = {}
+    
+    ## read arguments
+    #stat = request.args.get('stat')
+    #loc = request.args.get('loc')
+    #date = request.args.get('date')
+    #ymd = request.args.get('ymd')
+    #missing = request.args.get('missing')
+    #extra = request.args.get('extra')
 @app.route('/version')
 def version():
     
