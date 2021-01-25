@@ -17,22 +17,21 @@ def load_data(temp_dir):
     global ccodwg, keys_prov, keys_hr, version
     
     ## list data files
-    files = glob.glob(temp_dir.name + '/**/*.csv', recursive=True)
-    filenames = [os.path.splitext(os.path.basename(f))[0] for f in files]
+    file_paths = glob.glob(temp_dir.name + '/**/*.csv', recursive=True)
+    file_names = [os.path.splitext(os.path.basename(f))[0] for f in file_paths]
     
-    ## create dictionary of dataframes
-    ccodwg = [pd.read_csv(f) for f in files]
-    ccodwg = {filenames[i]: ccodwg[i] for i in range(0, len(ccodwg), 1)}
+    ## create dictionary: {datasets: paths to datasets}
+    ccodwg = {file_names[i]: file_paths[i] for i in range(len(file_names))}
     
-    ## create keys for provinces and health regions
-    keys_prov = ccodwg['prov_map'][['province_short', 'province']].set_index(['province_short']).to_dict('index')
-    keys_hr = ccodwg['hr_map'][['HR_UID', 'province', 'health_region']]
+    ## load data into memory: province and health region keys
+    keys_prov = pd.read_csv(ccodwg['prov_map'])[['province_short', 'province']].set_index(['province_short']).to_dict('index')
+    keys_hr = pd.read_csv(ccodwg['hr_map'])[['HR_UID', 'province', 'health_region']]
     keys_hr.loc[keys_hr.HR_UID == 9999, "province"] = "All Provinces"
     keys_hr = keys_hr.drop_duplicates().set_index(['HR_UID'])
     keys_hr.index = keys_hr.index.map(str)
     keys_hr = keys_hr.to_dict('index')
     
-    ## read in version - full string and date only
+    ## load data into memory: version - full string and date only
     version = dict.fromkeys(['version', 'date'])
     version['version'] = pd.read_csv(os.path.join(temp_dir.name, 'update_time.txt'), sep='\t', header=None).head().values[0][0]
     version['date'] = pd.to_datetime(version['version'].split()[0])

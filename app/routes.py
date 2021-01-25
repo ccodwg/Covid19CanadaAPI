@@ -23,6 +23,10 @@ def date_arg(arg):
             arg = None
     return arg
 
+## get date column
+def get_date_col(df):
+    return list(filter(re.compile('^date_.*').search, df.columns.values))[0]
+
 # list of dataset by location
 data_canada = ['cases_timeseries_canada',
                'mortality_timeseries_canada',
@@ -69,7 +73,7 @@ def index():
     response = {}
     
     # subset dataframes
-    dfs = {k: data.ccodwg[k] for k in data_canada}
+    dfs = {k: pd.read_csv(data.ccodwg[k]) for k in data_canada}
     
     # rename date columns
     for df in dfs.values():
@@ -144,160 +148,126 @@ def timeseries():
         if stat == 'cases':
             data_name = data_canada[0]
             resp_name = data_names[0]
-            dfs = data.ccodwg[data_name]
+            dfs = [pd.read_csv(data.ccodwg[data_name])]
         elif stat == 'mortality':
             data_name = data_canada[1]
             resp_name = data_names[1]
-            dfs = data.ccodwg[data_name]
+            dfs = [pd.read_csv(data.ccodwg[data_name])]
         elif stat == 'recovered':
             data_name = data_canada[2]
             resp_name = data_names[2]
-            dfs = data.ccodwg[data_name]
+            dfs = [pd.read_csv(data.ccodwg[data_name])]
         elif stat == 'testing':
             data_name = data_canada[3]
             resp_name = data_names[3]
-            dfs = data.ccodwg[data_name]
+            dfs = [pd.read_csv(data.ccodwg[data_name])]
         elif stat == 'active':
             data_name = data_canada[4]
             resp_name = data_names[4]
-            dfs = data.ccodwg[data_name]
+            dfs = [pd.read_csv(data.ccodwg[data_name])]
         elif stat == 'avaccine':
             data_name = data_canada[5]
             resp_name = data_names[5]
-            dfs = data.ccodwg[data_name]
+            dfs = [pd.read_csv(data.ccodwg[data_name])]
         elif stat == 'dvaccine':
             data_name = data_canada[6]
             resp_name = data_names[6]
-            dfs = data.ccodwg[data_name]
+            dfs = [pd.read_csv(data.ccodwg[data_name])]
         elif stat == 'cvaccine':
             data_name = data_canada[7]
             resp_name = data_names[7]
-            dfs = data.ccodwg[data_name]
+            dfs = [pd.read_csv(data.ccodwg[data_name])]
         else:
-            dfs = {k: data.ccodwg[k] for k in data_canada}
+            dfs = {k: pd.read_csv(data.ccodwg[k]) for k in data_canada}
+            dfs = list(dfs.values()) # convert to list
     elif loc == 'prov' or loc in data.keys_prov.keys():
         if stat == 'cases':
             data_name = data_prov[0]
             resp_name = data_names[0]
-            dfs = data.ccodwg[data_name]
+            dfs = [pd.read_csv(data.ccodwg[data_name])]
         elif stat == 'mortality':
             data_name = data_prov[1]
             resp_name = data_names[1]
-            dfs = data.ccodwg[data_name]
+            dfs = [pd.read_csv(data.ccodwg[data_name])]
         elif stat == 'recovered':
             data_name = data_prov[2]
             resp_name = data_names[2]
-            dfs = data.ccodwg[data_name]
+            dfs = [pd.read_csv(data.ccodwg[data_name])]
         elif stat == 'testing':
             data_name = data_prov[3]
             resp_name = data_names[3]
-            dfs = data.ccodwg[data_name]
+            dfs = [pd.read_csv(data.ccodwg[data_name])]
         elif stat == 'active':
             data_name = data_prov[4]
             resp_name = data_names[4]
-            dfs = data.ccodwg[data_name]
+            dfs = [pd.read_csv(data.ccodwg[data_name])]
         elif stat == 'avaccine':
             data_name = data_prov[5]
             resp_name = data_names[5]
-            dfs = data.ccodwg[data_name]
+            dfs = [pd.read_csv(data.ccodwg[data_name])]
         elif stat == 'dvaccine':
             data_name = data_prov[6]
             resp_name = data_names[6]
-            dfs = data.ccodwg[data_name]
+            dfs = [pd.read_csv(data.ccodwg[data_name])]
         elif stat == 'cvaccine':
             data_name = data_prov[7]
             resp_name = data_names[7]
-            dfs = data.ccodwg[data_name]
+            dfs = [pd.read_csv(data.ccodwg[data_name])]
         else:
-            dfs = {k: data.ccodwg[k] for k in data_prov}
+            dfs = {k: pd.read_csv(data.ccodwg[k]) for k in data_prov}
+            dfs = list(dfs.values()) # convert to list
     elif loc == 'hr' or loc in data.keys_hr.keys():
         if stat == 'cases':
             data_name = data_hr[0]
             resp_name = data_names[0]
-            dfs = data.ccodwg[data_name]
+            dfs = [pd.read_csv(data.ccodwg[data_name])]
         elif stat == 'mortality':
             data_name = data_hr[1]
             resp_name = data_names[1]
-            dfs = data.ccodwg[data_name]
+            dfs = [pd.read_csv(data.ccodwg[data_name])]
         else:
-            dfs = {k: data.ccodwg[k] for k in data_hr}
+            dfs = {k: pd.read_csv(data.ccodwg[k]) for k in data_canada}
+            dfs = list(dfs.values()) # convert to list
     else:
         return "Record not found", 404
     
-    # the rest of the code depends on whether stat is specified or not (i.e., whether dfs is a DataFrame or a dict)
-    if stat is None:
-        
-        # filter by location
-        if loc in data.keys_prov.keys():
-            for k in dfs.keys():
-                dfs[k] = dfs[k].loc[dfs[k]['province'] == data.keys_prov[loc]['province']]
-        elif loc in data.keys_hr.keys():
-            for k in dfs.keys():
-                dfs[k] = dfs[k].loc[dfs[k]['health_region'] == data.keys_hr[loc]['health_region']]
-                if loc != '9999':
-                    dfs[k] = dfs[k].loc[dfs[k]['province'] == data.keys_hr[loc]['province']]        
-        
-        # convert date columns
-        for k in dfs.keys():
-            col_date = list(filter(re.compile('^date_.*').search, dfs[k].columns.values))[0]
-            dfs[k][col_date] = pd.to_datetime(dfs[k][col_date], dayfirst=True)
-        
-        # filter by date
-        for k in dfs.keys():
-            col_date = list(filter(re.compile('^date_.*').search, dfs[k].columns.values))[0]
-            if date:
-                dfs[k] = dfs[k].loc[dfs[k][col_date] == date]
-            if after:
-                dfs[k] = dfs[k].loc[dfs[k][col_date] >= after]
-            if before:
-                dfs[k] = dfs[k].loc[dfs[k][col_date] <= before]
-        
-        # format output
-        for k in dfs.keys():
-            col_date = list(filter(re.compile('^date_.*').search, dfs[k].columns.values))[0]
-            if ymd == 'true':
-                dfs[k][col_date] = dfs[k][col_date].dt.strftime('%Y-%m-%d')
-            else:
-                dfs[k][col_date] = dfs[k][col_date].dt.strftime('%d-%m-%Y')
-            dfs[k] = dfs[k].fillna('NULL')
-            
-            # get response name
-            resp_name = data_names_dates[col_date]
-            
-            # write response
-            response[resp_name] = dfs[k].to_dict(orient='records')        
-    else:
-        
-        # determine date column
-        col_date = list(filter(re.compile('^date_.*').search, dfs.columns.values))[0]
-        
-        # filter by location
-        if loc in data.keys_prov.keys():
-            dfs = dfs.loc[dfs['province'] == data.keys_prov[loc]['province']]
-        elif loc in data.keys_hr.keys():
-            dfs = dfs.loc[dfs['health_region'] == data.keys_hr[loc]['health_region']]
+    # filter by location
+    if loc in data.keys_prov.keys():
+        for i in range(len(dfs)):
+            dfs[i] = dfs[i].loc[dfs[i]['province'] == data.keys_prov[loc]['province']]
+    elif loc in data.keys_hr.keys():
+        for i in range(len(dfs)):
+            dfs[i] = dfs[i].loc[dfs[i]['health_region'] == data.keys_hr[loc]['health_region']]
             if loc != '9999':
-                dfs = dfs.loc[dfs['province'] == data.keys_hr[loc]['province']]         
-        
-        # convert date column
-        dfs[col_date] = pd.to_datetime(dfs[col_date], dayfirst=True)
-        
-        # filter by date
+                dfs[i] = dfs[i].loc[dfs[i]['province'] == data.keys_hr[loc]['province']]
+    
+    # convert date column
+    for i in range(len(dfs)):
+        col_date = get_date_col(dfs[i])
+        dfs[i][col_date] = pd.to_datetime(dfs[i][col_date], dayfirst=True)
+    
+    # filter by date
+    for i in range(len(dfs)):
         if date:
-            dfs = dfs.loc[dfs[col_date] == date]
+            dfs[i] = dfs[i].loc[dfs[i][col_date] == date]
         if after:
-            dfs = dfs.loc[dfs[col_date] >= after]
+            dfs[i] = dfs[i].loc[dfs[i][col_date] >= after]
         if before:
-            dfs = dfs.loc[dfs[col_date] <= before]        
-        
-        # format output
+            dfs[i] = dfs[i].loc[dfs[i][col_date] <= before]        
+    
+    # format output
+    for i in range(len(dfs)):
+        col_date = get_date_col(dfs[i])
         if ymd == 'true':
-            dfs[col_date] = dfs[col_date].dt.strftime('%Y-%m-%d')
+            dfs[i][col_date] = dfs[i][col_date].dt.strftime('%Y-%m-%d')
         else:
-            dfs[col_date] = dfs[col_date].dt.strftime('%d-%m-%Y')
-        dfs = dfs.fillna('NULL')
-        response[resp_name] = dfs.to_dict(orient='records')        
+            dfs[i][col_date] = dfs[i][col_date].dt.strftime('%d-%m-%Y')
+        dfs[i] = dfs[i].fillna('NULL')
         
+        # determine response name and add dataframe to response
+        resp_name = data_names_dates[col_date]
+        response[resp_name] = dfs[i].to_dict(orient='records')
+    
     # add version to response
     if version == 'true':
         response['version'] = data.version['version']
@@ -335,11 +305,11 @@ def summary():
     
     # get dataframes and subset by location
     if loc == 'canada':
-        dfs = {k: data.ccodwg[k] for k in data_canada}
+        dfs = {k: pd.read_csv(data.ccodwg[k]) for k in data_canada}
     elif loc == 'prov' or loc in data.keys_prov.keys():
-        dfs = {k: data.ccodwg[k] for k in data_prov}
+        dfs = {k: pd.read_csv(data.ccodwg[k]) for k in data_prov}
     elif loc == 'hr' or loc in data.keys_hr.keys():
-        dfs = {k: data.ccodwg[k] for k in data_hr}
+        dfs = {k: pd.read_csv(data.ccodwg[k]) for k in data_hr}
     else:
         return "Record not found", 404    
     
