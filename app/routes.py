@@ -384,6 +384,31 @@ def individual():
     #ymd = request.args.get('ymd')
     #missing = request.args.get('missing')
     #extra = request.args.get('extra')
+
+@app.route('/other')
+def other():
+    
+    # initialize response
+    response = {}
+    
+    # read arguments
+    stat = request.args.get('stat')
+    missing = request.args.get('missing')
+    version = request.args.get('version')
+    
+    # process other arguments
+    missing_val = missing_arg(missing)
+    
+    # get dataframes
+    
+    
+    # add version to response
+    if version == 'true':
+        response['version'] = data.version['version']    
+    
+    # return response
+    return response    
+
 @app.route('/version')
 def version():
     
