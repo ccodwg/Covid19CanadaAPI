@@ -114,6 +114,7 @@ def individual():
     #loc = request.args.get('loc')
     #date = request.args.get('date')
     #ymd = request.args.get('ymd')
+    #missing = request.args.get('missing')
     #extra = request.args.get('extra')
 
 @app.route('/timeseries')
@@ -129,6 +130,7 @@ def timeseries():
     after = request.args.get('after')
     before = request.args.get('before')
     ymd = request.args.get('ymd')
+    missing = request.args.get('missing')
     version = request.args.get('version')
     
     # process date arguments
@@ -139,7 +141,13 @@ def timeseries():
     if before:
         before = date_arg(before)
     
-    # default arguments
+    # process other arguments
+    if missing == 'empty':
+        missing_val = ''
+    elif missing == 'na':
+        missing_val = 'NA'
+    else:
+        missing_val = 'NULL'
     if not loc:
         loc = 'prov'
     
@@ -262,7 +270,7 @@ def timeseries():
             dfs[i][col_date] = dfs[i][col_date].dt.strftime('%Y-%m-%d')
         else:
             dfs[i][col_date] = dfs[i][col_date].dt.strftime('%d-%m-%Y')
-        dfs[i] = dfs[i].fillna('NULL')
+        dfs[i] = dfs[i].fillna(missing_val)
         
         # determine response name and add dataframe to response
         resp_name = data_names_dates[col_date]
@@ -287,6 +295,7 @@ def summary():
     after = request.args.get('after')
     before = request.args.get('before')
     ymd = request.args.get('ymd')
+    missing = request.args.get('missing')
     version = request.args.get('version')
     
     # process date arguments
@@ -296,10 +305,18 @@ def summary():
         after = date_arg(after)
     if before:
         before = date_arg(before)
-        
-    # default arguments
     if not date and not after and not before:
-        date = data.version['date']
+        date = data.version['date']    
+        
+    # process other arguments
+    if missing == 'empty':
+        missing_val = ''
+    elif missing == 'na':
+        missing_val = 'NA'
+    elif missing == 'nan':
+        missing_val = 'NaN'
+    else:
+        missing_val = 'NULL'
     if not loc:
         loc = 'prov'
     
@@ -358,7 +375,7 @@ def summary():
         df['date'] = df['date'].dt.strftime('%Y-%m-%d')
     else:
         df['date'] = df['date'].dt.strftime('%d-%m-%Y')
-    df = df.fillna('NULL')
+    df = df.fillna(missing_val)
     response['summary'] = df.to_dict(orient='records')  
     
     # add version to response
