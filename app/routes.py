@@ -236,6 +236,7 @@ def timeseries():
     
     # filter by date
     for i in range(len(dfs)):
+        col_date = get_date_col(dfs[i])
         if date:
             dfs[i] = dfs[i].loc[dfs[i][col_date] == date]
         if after:
