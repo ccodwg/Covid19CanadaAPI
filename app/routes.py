@@ -432,8 +432,14 @@ def version():
     # initialize response
     response = {}
     
+    # read arguments
+    dateonly = request.args.get('dateonly')
+    
     # get version
-    response['version'] = data.version['version']
+    if dateonly == 'true':
+        response['version'] = data.version['version'].split()[0]
+    else:
+        response['version'] = data.version['version']
     
     # return response
     return response
