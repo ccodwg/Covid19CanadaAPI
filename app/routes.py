@@ -66,6 +66,8 @@ data_names = ['cases',
               'avaccine',
               'dvaccine',
               'cvaccine']
+data_sknew = ['sk_new_cases_timeseries_hr_combined',
+              'sk_new_mortality_timeseries_hr_combined']
 data_names_dates = {
     'date_report': 'cases',
     'date_death_report': 'mortality',
@@ -264,6 +266,90 @@ def timeseries():
     # return response
     return response
 
+@app.route('/sknew')
+def sknew():
+
+    # initialize response
+    response = {}    
+    
+    # read arguments
+    stat = request.args.get('stat')
+    loc = request.args.get('loc')
+    date = request.args.get('date')
+    after = request.args.get('after')
+    before = request.args.get('before')
+    ymd = request.args.get('ymd')
+    missing = request.args.get('missing')
+    version = request.args.get('version')
+    
+    # process date arguments
+    if date:
+        date = date_arg(date)
+    if after:
+        after = date_arg(after)
+    if before:
+        before = date_arg(before)
+    
+    # process other arguments
+    missing_val = missing_arg(missing)
+
+    # get dataframes
+    if stat == 'cases':
+        data_name = data_sknew[0]
+        dfs = [pd.read_csv(data.ccodwg[data_name])]
+    elif stat == 'mortality':
+        data_name = data_sknew[1]
+        dfs = [pd.read_csv(data.ccodwg[data_name])]
+    else:
+        dfs = {k: pd.read_csv(data.ccodwg[k]) for k in data_sknew}
+        dfs = list(dfs.values()) # convert to list
+
+    # filter by location
+    if loc in data.keys_prov.keys():
+        for i in range(len(dfs)):
+            dfs[i] = dfs[i].loc[dfs[i]['province'] == data.keys_prov[loc]['province']]
+    elif loc in data.keys_hr.keys():
+        for i in range(len(dfs)):
+            dfs[i] = dfs[i].loc[dfs[i]['health_region'] == data.keys_hr[loc]['health_region']]
+            if loc != '9999':
+                dfs[i] = dfs[i].loc[dfs[i]['province'] == data.keys_hr[loc]['province']]
+
+    # convert date column
+    for i in range(len(dfs)):
+        col_date = get_date_col(dfs[i])
+        dfs[i][col_date] = pd.to_datetime(dfs[i][col_date], dayfirst=True)
+    
+    # filter by date
+    for i in range(len(dfs)):
+        col_date = get_date_col(dfs[i])
+        if date:
+            dfs[i] = dfs[i].loc[dfs[i][col_date] == date]
+        if after:
+            dfs[i] = dfs[i].loc[dfs[i][col_date] >= after]
+        if before:
+            dfs[i] = dfs[i].loc[dfs[i][col_date] <= before]        
+    
+    # format output
+    for i in range(len(dfs)):
+        col_date = get_date_col(dfs[i])
+        if ymd == 'true':
+            dfs[i][col_date] = dfs[i][col_date].dt.strftime('%Y-%m-%d')
+        else:
+            dfs[i][col_date] = dfs[i][col_date].dt.strftime('%d-%m-%Y')
+        dfs[i] = dfs[i].fillna(missing_val)
+        
+        # determine response name and add dataframe to response
+        resp_name = data_names_dates[col_date]
+        response[resp_name] = dfs[i].to_dict(orient='records')
+    
+    # add version to response
+    if version == 'true':
+        response['version'] = data.version['version']
+    
+    # return response
+    return response
+
+
 @app.route('/summary')
 def summary():
     
@@ -361,7 +447,7 @@ def summary():
 
 @app.route('/individual')
 def individual():
-    return "Individual level data return is temporarily disabled, please download from GitHub: https://github.com/ccodwg/Covid19Canada", 404
+    return "Individual level data are retired. Archived data may be downloaded from GitHub: https://github.com/ccodwg/Covid19Canada", 404
     
     ## initialize response
     #response = {}
