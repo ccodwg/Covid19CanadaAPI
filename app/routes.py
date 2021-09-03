@@ -95,7 +95,7 @@ def index():
     
     # rename date columns
     for df in dfs.values():
-        df.columns = df.columns.str.replace('^date_.*', 'date')
+        df.columns = df.columns.str.replace('^date_.*', 'date', regex = True)
     
     # subset active dataframe to avoid duplicate columns
     dfs['active_timeseries_canada'] = dfs['active_timeseries_canada'].drop(columns=['cumulative_cases',
