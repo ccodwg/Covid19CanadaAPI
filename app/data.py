@@ -10,8 +10,8 @@ import git
 
 # define functions
 
-## read in data
-def load_data(temp_dir):
+## read in data (time series dataset)
+def load_data_ts(temp_dir):
     
     ## make data available globally
     global ccodwg, keys_prov, keys_hr, version
@@ -36,8 +36,8 @@ def load_data(temp_dir):
     version['version'] = pd.read_csv(os.path.join(temp_dir.name, 'update_time.txt'), sep='\t', header=None).head().values[0][0]
     version['date'] = pd.to_datetime(version['version'].split()[0])
 
-## update data
-def update_data(temp_dir):
+## update data (time series dataset)
+def update_data_ts(temp_dir):
     
     ## make data available globally
     global ccodwg, keys_prov, keys_hr, version
@@ -51,7 +51,7 @@ def update_data(temp_dir):
     print('Checking if data have changed...')
     if (pd.read_csv(os.path.join(temp_dir.name, 'update_time.txt'), sep="\t", header=None).head().values[0][0] != version['version']):
         print('Data have changed. Reloading files...')
-        load_data(temp_dir)
+        load_data_ts(temp_dir)
         print('Data have been updated.')
     else:
         print('Data have not changed. No action required.')
@@ -61,10 +61,10 @@ print('Cloning from CCODWG repository...')
 temp_dir = tempfile.TemporaryDirectory()
 git.Repo.clone_from('https://github.com/ccodwg/Covid19Canada.git', temp_dir.name, branch='master', depth=1)
 print('Clone complete. Reading in data...')
-load_data(temp_dir)
+load_data_ts(temp_dir)
 print('Data are ready.')
 
-# check for data updates every 5 minutes
+# check for data updates
 scheduler = BackgroundScheduler()
-job = scheduler.add_job(update_data, 'interval', minutes=5, args=[temp_dir])
+job_ts = scheduler.add_job(update_data_ts, 'interval', minutes=5, args=[temp_dir])
 scheduler.start()
