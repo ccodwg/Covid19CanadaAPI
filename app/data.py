@@ -7,6 +7,8 @@ import glob
 from datetime import datetime
 import pandas as pd
 from boto3 import client
+from botocore import UNSIGNED
+from botocore.client import Config
 import tempfile
 import git
 
@@ -66,7 +68,7 @@ def load_data_archive_index(temp_dir):
     
     ## load file index into 'archive' dictionary
     print('Downloading archive file index...')
-    file = client('s3').get_object(Bucket='data.opencovid.ca', Key='archive/file_index.csv')
+    file = client('s3', config=Config(signature_version=UNSIGNED)).get_object(Bucket='data.opencovid.ca', Key='archive/file_index.csv')
     archive['index'] = pd.read_csv(io.BytesIO(file['Body'].read()))
     version_archive_index = file['ResponseMetadata']['HTTPHeaders']['last-modified']
     print('File index ready.')
@@ -79,7 +81,7 @@ def update_data_archive_index(temp_dir):
     
     ## read in updated file index if version has changed
     print('Checking if archive file index has changed...')
-    version_archive_index_new = client('s3').get_object(Bucket='data.opencovid.ca', Key='archive/file_index.csv')['ResponseMetadata']['HTTPHeaders']['last-modified']
+    version_archive_index_new = client('s3', config=Config(signature_version=UNSIGNED)).get_object(Bucket='data.opencovid.ca', Key='archive/file_index.csv')['ResponseMetadata']['HTTPHeaders']['last-modified']
     if (version_archive_index_new != version_archive_index):
         print('Archive file index has changed. Reloading index...')
         load_data_archive_index(temp_dir)
@@ -102,7 +104,7 @@ print('Time series data are ready.')
 ## archive file index
 global archive, version_archive_index
 archive = {}
-version_archive_index = client('s3').get_object(Bucket='data.opencovid.ca', Key='archive/file_index.csv')['ResponseMetadata']['HTTPHeaders']['last-modified']
+version_archive_index = client('s3', config=Config(signature_version=UNSIGNED)).get_object(Bucket='data.opencovid.ca', Key='archive/file_index.csv')['ResponseMetadata']['HTTPHeaders']['last-modified']
 load_data_archive_index(temp_dir)
 
 # check for data updates
