@@ -1,9 +1,11 @@
 APScheduler
+boto3
 click
 Flask
 Flask-Cors
 GitPython
 gunicorn
+io
 itsdangerous
 Jinja2
 MarkupSafe

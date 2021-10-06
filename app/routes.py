@@ -529,3 +529,26 @@ def version():
     
     # return response
     return response
+
+@app.route('/archive')
+def archive():
+    
+    # initialize response
+    response = {}
+    
+    # read UUIDs
+    uuid = request.args.get('uuid')
+    if uuid is None:
+        return "Please specify one or more values for 'uuid', seperated by '|'.", 404
+    else:
+        uuid = uuid.split('|')
+    
+    # get dataframe
+    df = data.archive['index']
+    df = df[df['uuid'].isin(uuid)]
+    
+    # format output
+    response['index'] = df.to_dict(orient='records')
+    
+    # return response
+    return response
