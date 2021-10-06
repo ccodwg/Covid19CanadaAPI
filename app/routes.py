@@ -349,7 +349,6 @@ def sknew():
     # return response
     return response
 
-
 @app.route('/summary')
 def summary():
     
@@ -448,17 +447,6 @@ def summary():
 @app.route('/individual')
 def individual():
     return "Individual level data are retired. Archived data may be downloaded from GitHub: https://github.com/ccodwg/Covid19Canada", 404
-    
-    ## initialize response
-    #response = {}
-    
-    ## read arguments
-    #stat = request.args.get('stat')
-    #loc = request.args.get('loc')
-    #date = request.args.get('date')
-    #ymd = request.args.get('ymd')
-    #missing = request.args.get('missing')
-    #extra = request.args.get('extra')
 
 @app.route('/other')
 def other():
