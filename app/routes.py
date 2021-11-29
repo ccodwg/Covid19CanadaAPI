@@ -4,7 +4,7 @@ from flask_cors import CORS
 CORS(app) # enable CORS for all routes
 
 # import libraries
-from flask import request
+from flask import request, jsonify
 import pandas as pd
 import re
 from datetime import datetime
@@ -521,9 +521,6 @@ def version():
 @app.route('/archive')
 def archive():
     
-    # initialize response
-    response = {}
-    
     # read UUIDs
     uuid = request.args.get('uuid')
     if uuid is None:
@@ -536,7 +533,7 @@ def archive():
     df = df[df['uuid'].isin(uuid)]
     
     # format output
-    response['index'] = df.to_dict(orient='records')
-    
+    response = jsonify(df.to_dict(orient='records'))
+    print(response)
     # return response
     return response
