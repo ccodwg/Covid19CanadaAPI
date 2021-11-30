@@ -530,7 +530,11 @@ def datasets():
     
     # filter dictionary
     response = data.datasets['datasets']
-    response = {k: response[k] for k in uuid}
+    try:
+        response = {k: response[k] for k in uuid}
+    except Exception as e:
+        print(e)
+        return "UUID not found", 404
     
     # return response
     return(response)
@@ -548,6 +552,8 @@ def archive():
     # get dataframe
     df = data.archive['index']
     df = df[df['uuid'].isin(uuid)]
+    if len(df) == 0:
+        return "UUID not found", 404
     
     # format output
     response = jsonify(df.to_dict(orient='records'))
