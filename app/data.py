@@ -6,6 +6,8 @@ import io
 import glob
 from datetime import datetime
 import pandas as pd
+import json
+import requests
 from boto3 import client
 from botocore import UNSIGNED
 from botocore.client import Config
@@ -60,6 +62,42 @@ def update_data_ts(temp_dir):
     else:
         print('Time series data have not changed. No action required.')
 
+## read in data (datasets.json)
+def load_data_datasets(temp_dir):
+    
+    ## make data available globally
+    global datasets, version_datasets
+    
+    ## load datasets.json into 'datasets' dictionary
+    print('Downloading datasets.json...')
+    file = requests.get('https://raw.githubusercontent.com/ccodwg/Covid19CanadaArchive/master/datasets.json')
+    file = json.loads(file.content)
+    # convert datasets into single dictionary
+    ds = {}
+    for a in file:
+        for d in file[a]:
+            for i in range(len(file[a][d])):
+                    ds[file[a][d][i]['uuid']] = file[a][d][i]
+    datasets['datasets'] = ds
+    version_datasets = requests.get('https://api.github.com/repos/ccodwg/Covid19CanadaArchive/commits?path=datasets.json').headers['last-modified']
+    print('File datasets.json ready.')
+
+## update data (datasets.json)
+def update_data_datasets(temp_dir):
+    
+    ## make data available globally
+    global datasets, version_datasets
+    
+    ## read in updated datasets.json if version has changed
+    print('Checking if datasets.json has changed...')
+    version_datasets_new = requests.get('https://api.github.com/repos/ccodwg/Covid19CanadaArchive/commits?path=datasets.json').headers['last-modified']
+    if (version_datasets_new != version_datasets):
+        print('File datasets.json has changed. Reloading index...')
+        load_data_datasets(temp_dir)
+        print('File datasets.json has been updated.')
+    else:
+        print('File datasets.json has not changed. No action required.')
+
 ## read in data (archive file index)
 def load_data_archive_index(temp_dir):
     
@@ -101,6 +139,12 @@ print('Clone complete. Reading in time series data...')
 load_data_ts(temp_dir)
 print('Time series data are ready.')
 
+## datasets
+global datasets, version_datasets
+datasets = {}
+version_datasets = requests.get('https://api.github.com/repos/ccodwg/Covid19CanadaArchive/commits?path=datasets.json').headers['last-modified']
+load_data_datasets(temp_dir)
+
 ## archive file index
 global archive, version_archive_index
 archive = {}
@@ -110,5 +154,6 @@ load_data_archive_index(temp_dir)
 # check for data updates
 scheduler = BackgroundScheduler()
 job_ts = scheduler.add_job(update_data_ts, 'interval', minutes=5, args=[temp_dir])
+job_datasets = scheduler.add_job(update_data_datasets, 'interval', minutes=5, args=[temp_dir])
 job_archive_index = scheduler.add_job(update_data_archive_index, 'interval', minutes=30, args=[temp_dir])
 scheduler.start()

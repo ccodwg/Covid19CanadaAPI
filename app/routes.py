@@ -518,6 +518,23 @@ def version():
     # return response
     return response
 
+@app.route('/datasets')
+def datasets():
+    
+    # read UUIDs
+    uuid = request.args.get('uuid')
+    if uuid is None:
+        return data.datasets['datasets']
+    else:
+        uuid = uuid.split('|')
+    
+    # filter dictionary
+    response = data.datasets['datasets']
+    response = {k: response[k] for k in uuid}
+    
+    # return response
+    return(response)
+
 @app.route('/archive')
 def archive():
     
@@ -534,6 +551,6 @@ def archive():
     
     # format output
     response = jsonify(df.to_dict(orient='records'))
-    print(response)
+    
     # return response
     return response
