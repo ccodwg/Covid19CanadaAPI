@@ -549,13 +549,56 @@ def archive():
     else:
         uuid = uuid.split('|')
     
+    # read date filters
+    date = request.args.get('date')
+    after = request.args.get('after')
+    before = request.args.get('before')
+    
+    # process date filters
+    if date is None and after is None and before is None:
+        # if no filters, return all
+        date = 'all'
+    else:
+        if date and date!= 'all' and date != 'latest' and date != 'first':
+            date = date_arg(date)
+        if after:
+            after = date_arg(after)
+        if before:
+            before = date_arg(before)
+    
     # get dataframe
     df = data.archive['index']
     df = df[df['uuid'].isin(uuid)]
+    
+    # return 404 if no valid UUIDs
     if len(df) == 0:
-        return "UUID not found", 404
+        return 'UUID not found', 404
+    
+    # date filtering
+    df['file_date_true'] = pd.to_datetime(df['file_date_true'])
+    if date:
+        # if date is defined, after and before are ignored
+        if (date == 'all'):
+            pass
+        elif (date == 'latest'):
+            df = df.groupby('uuid').last()
+        elif (date == 'first'):
+            df = df.groupby('uuid').first()
+        else:
+            if date:
+                df = df[df['file_date_true'] == date]
+    else:
+        if after:
+            df = df[df['file_date_true'] >= after]
+        if before:
+            df = df[df['file_date_true'] <= before]
+    
+    # return 404 if no results found
+    if len(df) == 0:
+        return 'No results, please check your date filters', 404
     
     # format output
+    df['file_date_true'] = df['file_date_true'].dt.strftime('%Y-%m-%d')
     response = jsonify(df.to_dict(orient='records'))
     
     # return response
