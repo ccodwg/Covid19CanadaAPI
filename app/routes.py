@@ -549,10 +549,13 @@ def archive():
     else:
         uuid = uuid.split('|')
     
-    # read date filters
+    # read parameters
     date = request.args.get('date')
     after = request.args.get('after')
     before = request.args.get('before')
+    remove_duplicates = request.args.get('remove_duplicates')
+    if (remove_duplicates):
+        remove_duplicates = str(remove_duplicates).lower()
     
     # process date filters
     if date is None and after is None and before is None:
@@ -596,6 +599,13 @@ def archive():
     # return 404 if no results found
     if len(df) == 0:
         return 'No results, please check your date filters', 404
+    
+    # filter duplicates in the filtered sample
+    # not the same thing as remove file_date_duplicate == 1,
+    # since the first instance of a duplicate dataset may not
+    # be in the filtered sample
+    if (remove_duplicates == 'true'):
+        df = df.drop_duplicates(subset=['file_etag'])
     
     # format output
     df['file_date_true'] = df['file_date_true'].dt.strftime('%Y-%m-%d')
