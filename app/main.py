@@ -1,18 +1,47 @@
-# import app components
-from app import app, data
-from flask_cors import CORS
-CORS(app) # enable CORS for all routes
-
-# import libraries
-from flask import request, jsonify
-import pandas as pd
+from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
+from starlette.responses import FileResponse
+from typing import Optional
 import re
-from datetime import datetime
 from functools import reduce
+from datetime import datetime
+import pandas as pd
+from app.data import data
 
-# define functions
+app = FastAPI(
+    title="COVID-19 Canada Open Data Working Group API",
+    docs_url="/",
+    recdoc_url=None
+)
 
-## process date args
+origins = ["*"]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_methods=["GET"],
+    allow_headers=["*"],
+)
+
+# define common functions
+
+## retired dataset text
+def retired_dataset():
+    return "This dataset has been retired but an archived version may be available on GitHub: https://github.com/ccodwg/Covid19Canada/tree/master/retired_datasets"
+
+## no results for query text
+def query_no_results():
+    return "No records match your query. Please try again with different settings."
+
+## UUID not found text
+def uuid_not_found():
+    return "UUID not found. Please try again with a valid UUID."
+
+## get date column
+def get_date_col(df):
+    return list(filter(re.compile('^date_.*').search, df.columns.values))[0]
+
+## interpret date arg
 def date_arg(arg):
     try:
         arg = datetime.strptime(arg, '%d-%m-%Y')
@@ -23,7 +52,7 @@ def date_arg(arg):
             arg = None
     return arg
 
-## process missing arg
+## interpret missing arg
 def missing_arg(missing):
     if missing == 'na':
         missing_val = 'NA'    
@@ -33,13 +62,9 @@ def missing_arg(missing):
         missing_val = 'NaN'
     else:
         missing_val = 'NULL'
-    return(missing_val)
+    return missing_val
 
-## get date column
-def get_date_col(df):
-    return list(filter(re.compile('^date_.*').search, df.columns.values))[0]
-
-# list of dataset by location
+# define constants
 data_canada = ['cases_timeseries_canada',
                'mortality_timeseries_canada',
                'recovered_timeseries_canada',
@@ -85,71 +110,32 @@ data_other = {
     'age_mortality': 'age_map_mortality'
 }
 
-@app.route('/')
-@app.route('/index')
-def index():
-    
-    # initialize response
-    response = {}
-    
-    # subset dataframes
-    dfs = {k: pd.read_csv(data.ccodwg[k]) for k in data_canada}
-    
-    # rename date columns
-    for df in dfs.values():
-        df.columns = df.columns.str.replace('^date_.*', 'date', regex = True)
-    
-    # subset active dataframe to avoid duplicate columns
-    dfs['active_timeseries_canada'] = dfs['active_timeseries_canada'].drop(columns=['cumulative_cases',
-                                                                                   'cumulative_recovered',
-                                                                                   'cumulative_deaths'])
-    
-    # merge dataframes
-    df = reduce(lambda left, right: pd.merge(left, right, on=['date', 'province'], how='outer'), dfs.values())
-    
-    # convert date column and filter to most recent date
-    df['date'] = pd.to_datetime(df['date'], dayfirst=True)
-    df = df.loc[df['date'] == data.version['date']]
-    
-    # format output
-    df['date'] = df['date'].dt.strftime('%d-%m-%Y')  
-    df = df.fillna('NULL')
-    response['summary'] = df.to_dict(orient='records')  
-    
-    # add version to response
-    response['version'] = data.version['version']
-    
-    # return response
-    return response
+# define routes
 
-@app.route('/timeseries')
-def timeseries():
+@app.get('/timeseries')
+async def get_timeseries(
+    stat: Optional[str] = None,
+    loc: str = "prov",
+    date: Optional[str] = None,
+    after: Optional[str] = None,
+    before: Optional[str] = None,
+    ymd: bool = False,
+    missing: Optional[str] = None,
+    version: bool = False):
     
-    # initialize response
-    response = {}    
-    
-    # read arguments
-    stat = request.args.get('stat')
-    loc = request.args.get('loc')
-    date = request.args.get('date')
-    after = request.args.get('after')
-    before = request.args.get('before')
-    ymd = request.args.get('ymd')
-    missing = request.args.get('missing')
-    version = request.args.get('version')
-    
-    # process date arguments
+    # process date args
     if date:
         date = date_arg(date)
     if after:
         after = date_arg(after)
     if before:
         before = date_arg(before)
-    
-    # process other arguments
+
+    # process arg "missing"
     missing_val = missing_arg(missing)
-    if not loc:
-        loc = 'prov'
+
+    # initialize response
+    response = {}
     
     # get dataframes
     if loc == 'canada':
@@ -219,7 +205,7 @@ def timeseries():
             dfs = {k: pd.read_csv(data.ccodwg[k]) for k in data_canada}
             dfs = list(dfs.values()) # convert to list
     else:
-        return "Record not found", 404
+        raise HTTPException(status_code=404, detail=query_no_results())
     
     # filter by location
     if loc in data.keys_prov.keys():
@@ -249,7 +235,7 @@ def timeseries():
     # format output
     for i in range(len(dfs)):
         col_date = get_date_col(dfs[i])
-        if ymd == 'true':
+        if ymd is True:
             dfs[i][col_date] = dfs[i][col_date].dt.strftime('%Y-%m-%d')
         else:
             dfs[i][col_date] = dfs[i][col_date].dt.strftime('%d-%m-%Y')
@@ -260,125 +246,36 @@ def timeseries():
         response[resp_name] = dfs[i].to_dict(orient='records')
     
     # add version to response
-    if version == 'true':
+    if version is True:
         response['version'] = data.version['version']
     
     # return response
     return response
 
-@app.route('/sknew')
-def sknew():
+@app.get("summary")
+async def get_summary(
+    loc: str = "prov",
+    date: Optional[str] = None,
+    after: Optional[str] = None,
+    before: Optional[str] = None,
+    ymd: bool = False,
+    missing: Optional[str] = None,
+    version: bool = False):
 
-    # initialize response
-    response = {}    
-    
-    # read arguments
-    stat = request.args.get('stat')
-    loc = request.args.get('loc')
-    date = request.args.get('date')
-    after = request.args.get('after')
-    before = request.args.get('before')
-    ymd = request.args.get('ymd')
-    missing = request.args.get('missing')
-    version = request.args.get('version')
-    
-    # process date arguments
+    # process date args
     if date:
         date = date_arg(date)
     if after:
         after = date_arg(after)
     if before:
         before = date_arg(before)
-    
-    # process other arguments
+
+    # process arg "missing"
     missing_val = missing_arg(missing)
 
-    # get dataframes
-    if stat == 'cases':
-        data_name = data_sknew[0]
-        dfs = [pd.read_csv(data.ccodwg[data_name])]
-    elif stat == 'mortality':
-        data_name = data_sknew[1]
-        dfs = [pd.read_csv(data.ccodwg[data_name])]
-    else:
-        dfs = {k: pd.read_csv(data.ccodwg[k]) for k in data_sknew}
-        dfs = list(dfs.values()) # convert to list
-
-    # filter by location
-    if loc in data.keys_prov.keys():
-        for i in range(len(dfs)):
-            dfs[i] = dfs[i].loc[dfs[i]['province'] == data.keys_prov[loc]['province']]
-    elif loc in data.keys_hr.keys():
-        for i in range(len(dfs)):
-            dfs[i] = dfs[i].loc[dfs[i]['health_region'] == data.keys_hr[loc]['health_region']]
-            if loc != '9999':
-                dfs[i] = dfs[i].loc[dfs[i]['province'] == data.keys_hr[loc]['province']]
-
-    # convert date column
-    for i in range(len(dfs)):
-        col_date = get_date_col(dfs[i])
-        dfs[i][col_date] = pd.to_datetime(dfs[i][col_date], dayfirst=True)
-    
-    # filter by date
-    for i in range(len(dfs)):
-        col_date = get_date_col(dfs[i])
-        if date:
-            dfs[i] = dfs[i].loc[dfs[i][col_date] == date]
-        if after:
-            dfs[i] = dfs[i].loc[dfs[i][col_date] >= after]
-        if before:
-            dfs[i] = dfs[i].loc[dfs[i][col_date] <= before]        
-    
-    # format output
-    for i in range(len(dfs)):
-        col_date = get_date_col(dfs[i])
-        if ymd == 'true':
-            dfs[i][col_date] = dfs[i][col_date].dt.strftime('%Y-%m-%d')
-        else:
-            dfs[i][col_date] = dfs[i][col_date].dt.strftime('%d-%m-%Y')
-        dfs[i] = dfs[i].fillna(missing_val)
-        
-        # determine response name and add dataframe to response
-        resp_name = data_names_dates[col_date]
-        response[resp_name] = dfs[i].to_dict(orient='records')
-    
-    # add version to response
-    if version == 'true':
-        response['version'] = data.version['version']
-    
-    # return response
-    return response
-
-@app.route('/summary')
-def summary():
-    
     # initialize response
-    response = {}    
-    
-    # read arguments
-    loc = request.args.get('loc')
-    date = request.args.get('date')
-    after = request.args.get('after')
-    before = request.args.get('before')
-    ymd = request.args.get('ymd')
-    missing = request.args.get('missing')
-    version = request.args.get('version')
-    
-    # process date arguments
-    if date:
-        date = date_arg(date)
-    if after:
-        after = date_arg(after)
-    if before:
-        before = date_arg(before)
-    if not date and not after and not before:
-        date = data.version['date']    
-        
-    # process other arguments
-    missing_val = missing_arg(missing)
-    if not loc:
-        loc = 'prov'
-    
+    response = {}
+
     # get dataframes and subset by location
     if loc == 'canada':
         dfs = {k: pd.read_csv(data.ccodwg[k]) for k in data_canada}
@@ -387,7 +284,7 @@ def summary():
     elif loc == 'hr' or loc in data.keys_hr.keys():
         dfs = {k: pd.read_csv(data.ccodwg[k]) for k in data_hr}
     else:
-        return "Record not found", 404
+        raise HTTPException(status_code=404, detail=query_no_results())
     
     # rename date columns
     for df in dfs.values():
@@ -430,7 +327,7 @@ def summary():
         df = df.loc[df['date'] <= before]
     
     # format output
-    if ymd == 'true':
+    if ymd is True:
         df['date'] = df['date'].dt.strftime('%Y-%m-%d')
     else:
         df['date'] = df['date'].dt.strftime('%d-%m-%Y')
@@ -438,26 +335,20 @@ def summary():
     response['summary'] = df.to_dict(orient='records')  
     
     # add version to response
-    if version == 'true':
+    if version is True:
         response['version'] = data.version['version']
     
     # return response
     return response
 
-@app.route('/individual')
-def individual():
-    return "Individual level data are retired. Archived data may be downloaded from GitHub: https://github.com/ccodwg/Covid19Canada", 404
-
-@app.route('/other')
-def other():
+@app.get('/other')
+async def get_other(
+    stat: Optional[str] = None,
+    missing: Optional[str] = None,
+    version: bool = False):
     
     # initialize response
     response = {}
-    
-    # read arguments
-    stat = request.args.get('stat')
-    missing = request.args.get('missing')
-    version = request.args.get('version')
     
     # process other arguments
     missing_val = missing_arg(missing)
@@ -473,7 +364,7 @@ def other():
         elif (stat == 'age_mortality'):
             dfs = pd.read_csv(data.ccodwg[data_other[stat]])
         else:
-            return "Record not found", 404
+            raise HTTPException(status_code=404, detail=query_no_results())
         
         # format output
         dfs = dfs.fillna(missing_val)
@@ -500,17 +391,14 @@ def other():
     # return response
     return response
 
-@app.route('/version')
-def version():
+@app.get('/version')
+async def get_version(dateonly: bool = False):
     
     # initialize response
     response = {}
     
-    # read arguments
-    dateonly = request.args.get('dateonly')
-    
     # get version
-    if dateonly == 'true':
+    if dateonly is True:
         response['version'] = data.version['version'].split()[0]
     else:
         response['version'] = data.version['version']
@@ -518,11 +406,10 @@ def version():
     # return response
     return response
 
-@app.route('/datasets')
-def datasets():
+@app.get('/datasets')
+async def get_datasets(uuid: Optional[str] = None):
     
     # read UUIDs
-    uuid = request.args.get('uuid')
     if uuid is None:
         return data.datasets['datasets']
     else:
@@ -532,30 +419,25 @@ def datasets():
     response = data.datasets['datasets']
     try:
         response = {k: response[k] for k in uuid}
-    except Exception as e:
-        print(e)
-        return "UUID not found", 404
+    except Exception:
+        raise HTTPException(status_code=404, detail=uuid_not_found())
     
     # return response
     return(response)
 
-@app.route('/archive')
-def archive():
+@app.get('/archive')
+async def get_archive(
+    uuid: Optional[str] = None,
+    remove_duplicates: bool = False,
+    date: Optional[str] = None,
+    after: Optional[str] = None,
+    before: Optional[str] = None):
     
     # read UUIDs
-    uuid = request.args.get('uuid')
     if uuid is None:
-        return "Please specify one or more values for 'uuid', seperated by '|'.", 404
+        raise HTTPException(status_code=404, detail="Please specify one or more values for 'uuid', seperated by '|'.")
     else:
         uuid = uuid.split('|')
-    
-    # read parameters
-    date = request.args.get('date')
-    after = request.args.get('after')
-    before = request.args.get('before')
-    remove_duplicates = request.args.get('remove_duplicates')
-    if (remove_duplicates):
-        remove_duplicates = str(remove_duplicates).lower()
     
     # process date filters
     if date is None and after is None and before is None:
@@ -575,7 +457,7 @@ def archive():
     
     # return 404 if no valid UUIDs
     if len(df) == 0:
-        return 'UUID not found', 404
+        raise HTTPException(status_code=404, detail=uuid_not_found())
     
     # date filtering
     df['file_date_true'] = pd.to_datetime(df['file_date_true'])
@@ -598,18 +480,30 @@ def archive():
     
     # return 404 if no results found
     if len(df) == 0:
-        return 'No results, please check your date filters', 404
+        raise HTTPException(status_code=404, detail=query_no_results())
     
     # filter duplicates in the filtered sample
     # not the same thing as remove file_date_duplicate == 1,
     # since the first instance of a duplicate dataset may not
     # be in the filtered sample
-    if (remove_duplicates == 'true'):
+    if (remove_duplicates is True):
         df = df.drop_duplicates(subset=['file_etag'])
     
     # format output
     df['file_date_true'] = df['file_date_true'].dt.strftime('%Y-%m-%d')
-    response = jsonify(df.to_dict(orient='records'))
+    response = df.to_dict(orient='records')
     
     # return response
     return response
+
+@app.get("/sknew")
+async def get_sknew():
+    raise HTTPException(status_code=404, detail=retired_dataset())
+
+@app.get("/individual")
+async def get_individual():
+    raise HTTPException(status_code=404, detail=retired_dataset())
+
+@app.get("/favicon.ico", include_in_schema=False)
+async def get_favicon():
+    return FileResponse("favicon.ico")
