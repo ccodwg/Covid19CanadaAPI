@@ -252,7 +252,7 @@ async def get_timeseries(
     # return response
     return response
 
-@app.get("summary")
+@app.get("/summary")
 async def get_summary(
     loc: str = "prov",
     date: Optional[str] = None,
