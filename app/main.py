@@ -25,6 +25,11 @@ app.add_middleware(
 
 # define common functions
 
+## add deprecation warning to response
+def add_deprecation_warning(response):
+    response["deprecation_warning"] = "This dataset is deprecated and will be removed on April 15, 2022. Please see details of our improved replacement dataset here: https://raw.githubusercontent.com/ccodwg/Covid19Canada/master/ccodwg_dataset_announcement.pdf"
+    return response
+
 ## retired dataset text
 def retired_dataset():
     return "This dataset has been retired but an archived version may be available on GitHub: https://github.com/ccodwg/Covid19Canada/tree/master/retired_datasets"
@@ -250,7 +255,7 @@ async def get_timeseries(
         response['version'] = data.version['version']
     
     # return response
-    return response
+    return add_deprecation_warning(response)
 
 @app.get("/summary")
 async def get_summary(
@@ -339,7 +344,7 @@ async def get_summary(
         response['version'] = data.version['version']
     
     # return response
-    return response
+    return add_deprecation_warning(response)
 
 @app.get('/other')
 async def get_other(
@@ -389,7 +394,7 @@ async def get_other(
         response['version'] = data.version['version']    
     
     # return response
-    return response
+    return add_deprecation_warning(response)
 
 @app.get('/version')
 async def get_version(dateonly: bool = False):
