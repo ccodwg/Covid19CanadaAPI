@@ -127,7 +127,7 @@ async def get_timeseries(
     ymd: bool = False,
     missing: Optional[str] = None,
     version: bool = False):
-    
+
     # process date args
     if date:
         date = date_arg(date)
@@ -207,7 +207,7 @@ async def get_timeseries(
             data_name = data_hr[1]
             dfs = [pd.read_csv(data.ccodwg[data_name])]
         else:
-            dfs = {k: pd.read_csv(data.ccodwg[k]) for k in data_canada}
+            dfs = {k: pd.read_csv(data.ccodwg[k]) for k in data_hr}
             dfs = list(dfs.values()) # convert to list
     else:
         raise HTTPException(status_code=404, detail=query_no_results())
@@ -274,6 +274,9 @@ async def get_summary(
         after = date_arg(after)
     if before:
         before = date_arg(before)
+    # if no date values specified, use latest date
+    if not date and not after and not before:
+        date = data.version["date"]
 
     # process arg "missing"
     missing_val = missing_arg(missing)
@@ -319,7 +322,6 @@ async def get_summary(
         df = df.loc[df['province'] == data.keys_prov[loc]['province']]
     elif loc in data.keys_hr.keys():
         df = df.loc[df['health_region'] == data.keys_hr[loc]['health_region']]
-        print("HI")
         if loc != '9999':
             df = df.loc[df['province'] == data.keys_hr[loc]['province']]
     
