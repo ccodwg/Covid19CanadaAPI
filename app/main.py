@@ -8,9 +8,15 @@ from datetime import datetime
 import pandas as pd
 from app.data import data
 
+tags_metadata = [
+    {"name": "Archive of Canadian COVID-19 Data", "description": "See https://github.com/ccodwg/Covid19CanadaArchive for more details"},
+    {"name": "Legacy dataset API", "description": "Deprecated and will be replaced on April 15, 2022"}
+]
+
 app = FastAPI(
     title="COVID-19 Canada Open Data Working Group API",
     docs_url="/",
+    openapi_tags=tags_metadata,
     recdoc_url=None
 )
 
@@ -117,7 +123,7 @@ data_other = {
 
 # define routes
 
-@app.get('/timeseries')
+@app.get('/timeseries', tags=['Legacy dataset API'])
 async def get_timeseries(
     stat: Optional[str] = None,
     loc: str = "prov",
@@ -257,7 +263,7 @@ async def get_timeseries(
     # return response
     return add_deprecation_warning(response)
 
-@app.get("/summary")
+@app.get("/summary", tags=['Legacy dataset API'])
 async def get_summary(
     loc: str = "prov",
     date: Optional[str] = None,
@@ -348,7 +354,7 @@ async def get_summary(
     # return response
     return add_deprecation_warning(response)
 
-@app.get('/other')
+@app.get('/other', tags=['Legacy dataset API'])
 async def get_other(
     stat: Optional[str] = None,
     missing: Optional[str] = None,
@@ -398,7 +404,7 @@ async def get_other(
     # return response
     return add_deprecation_warning(response)
 
-@app.get('/version')
+@app.get('/version', tags=['Legacy dataset API'])
 async def get_version(dateonly: bool = False):
     
     # initialize response
@@ -413,7 +419,7 @@ async def get_version(dateonly: bool = False):
     # return response
     return response
 
-@app.get('/datasets')
+@app.get('/datasets', tags=['Archive of Canadian COVID-19 Data'])
 async def get_datasets(uuid: Optional[str] = None):
     
     # read UUIDs
@@ -432,7 +438,7 @@ async def get_datasets(uuid: Optional[str] = None):
     # return response
     return(response)
 
-@app.get('/archive')
+@app.get('/archive', tags=['Archive of Canadian COVID-19 Data'])
 async def get_archive(
     uuid: Optional[str] = None,
     remove_duplicates: bool = False,
@@ -503,11 +509,11 @@ async def get_archive(
     # return response
     return response
 
-@app.get("/sknew")
+@app.get("/sknew", include_in_schema=False)
 async def get_sknew():
     raise HTTPException(status_code=404, detail=retired_dataset())
 
-@app.get("/individual")
+@app.get("/individual", include_in_schema=False)
 async def get_individual():
     raise HTTPException(status_code=404, detail=retired_dataset())
 
