@@ -33,7 +33,7 @@ app.add_middleware(
 
 ## add deprecation warning to response
 def add_deprecation_warning(response):
-    response["deprecation_warning"] = "This dataset is deprecated and will be removed on April 15, 2022. Please see details of our improved replacement dataset here: https://raw.githubusercontent.com/ccodwg/Covid19Canada/master/ccodwg_dataset_announcement.pdf"
+    response["deprecation_warning"] = "This dataset is deprecated and will be removed on April 30, 2022. Please see details of our improved replacement dataset here: https://raw.githubusercontent.com/ccodwg/Covid19Canada/master/ccodwg_dataset_announcement.pdf"
     return response
 
 ## retired dataset text
