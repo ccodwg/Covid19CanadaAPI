@@ -172,7 +172,7 @@ load_data_archive_index()
 
 # schedule data updates
 scheduler = BackgroundScheduler()
-job_ts = scheduler.add_job(update_data_ctc, "interval", minutes=5, args=[temp_dir])
+job_ctc = scheduler.add_job(update_data_ctc, "interval", minutes=5, args=[temp_dir])
 job_datasets = scheduler.add_job(update_data_datasets, "interval", minutes=5)
 job_archive_index = scheduler.add_job(update_data_archive_index, "interval", minutes=5)
 scheduler.start()

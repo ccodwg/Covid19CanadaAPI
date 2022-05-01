@@ -1,14 +1,14 @@
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.responses import FileResponse
-from datetime import date, datetime
+from datetime import date
 import re
 import pandas as pd
 from app.data import data
 
 tags_metadata = [
-    {"name": "CovidTimelineCanada", "description": "New Canadian COVID-19 dataset from the COVID-19 Canada Open Data Working Group"},
-    {"name": "Archive of Canadian COVID-19 Data", "description": "See https://github.com/ccodwg/Covid19CanadaArchive for more details"},
+    {"name": "CovidTimelineCanada", "description": "New Canadian COVID-19 dataset from the COVID-19 Canada Open Data Working Group (see https://github.com/ccodwg/CovidTimelineCanada)"},
+    {"name": "Archive of Canadian COVID-19 Data", "description": "Canadian COVID-19 Data Archive (see https://github.com/ccodwg/Covid19CanadaArchive)"},
     {"name": "Version", "description": "Update times corresponding to the data available from each route"}
 ]
 
@@ -55,7 +55,10 @@ query_geo = Query(
     enum = ["can", "pt", "hr"])
 query_loc = Query(
     None,
-    description = "Specific geography to filter to. Can be one or more province/territory codes or one or more health region codes. If not provided, all available data will be returned.",)
+    description = (
+        "Specific geography to filter to. "
+        "Can be one or more two-letter province/territory codes (https://github.com/ccodwg/CovidTimelineCanada/blob/main/geo/pt.csv) and/or health region unique identifiers (https://github.com/ccodwg/CovidTimelineCanada/blob/main/geo/health_regions.csv; 9999 is 'Unknown'). "
+        "If not provided, all available data will be returned."))
 query_date = Query(
     None,
     description = "Filter to include data only from this date (YYYY-MM-DD).")
@@ -83,7 +86,6 @@ query_hr_names = Query(
 
 # function: filter by date
 def date_filter(d, date, after, before):
-    print(date)
     if date:
         d = d[d["date"].dt.date == date]
     if after:
@@ -188,6 +190,10 @@ def fill_dates(d, geo):
     df = pd.concat([df] * len(dates), ignore_index = True)
     df = df.sort_values(cols[0:len(cols) - 1])
     df["date"] = dates * df_rows
+    if not pd.api.types.is_datetime64_ns_dtype(d["date"]):
+        d["date"] = pd.to_datetime(d["date"])
+    if not pd.api.types.is_datetime64_ns_dtype(df["date"]):
+        df["date"] = pd.to_datetime(df["date"])
     d = pd.merge(df, d, how = "left", on = cols)
     d = d.sort_values(by = cols)
     daily_cols = [x for x in d.columns if re.match("_daily$", x)]
@@ -218,8 +224,8 @@ async def get_timeseries(
     fill: bool = Query(
         False,
         description = (
-            "Fill in data such that every location has an observation for every date."
-            "For example, infrequently updated locations will not have an entry for recent dates if this parameter is false."
+            "Fill in data such that every location has an observation for every date. "
+            "For example, infrequently updated locations will not have an entry for recent dates if this parameter is false. "
             "Default: false.")
     ),
     version: bool = query_version,
@@ -331,7 +337,7 @@ async def get_summary(
 
     # if no date values specified, use latest date
     if not date and not after and not before:
-        date = pd.to_datetime(data.version_ctc, infer_datetime_format = True).date()
+        date = pd.to_datetime(data.version_ctc[0:10], format = "%Y-%m-%d").date()
 
     # initialize response
     response = {"data": {}}
