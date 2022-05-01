@@ -331,7 +331,7 @@ async def get_summary(
 
     # if no date values specified, use latest date
     if not date and not after and not before:
-        date = datetime.strptime(data.version_ctc, "%Y-%m-%d %H:%M %Z").date()
+        date = pd.to_datetime(data.version_ctc, infer_datetime_format = True).date()
 
     # initialize response
     response = {"data": {}}
