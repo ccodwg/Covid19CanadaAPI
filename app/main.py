@@ -154,7 +154,7 @@ def convert_names(d, geo, pt_names = "short", hr_names = "hruid"):
                 hr = hr[["hruid", col_hr]]
                 d = d.merge(hr, left_on = "sub_region_1", right_on = "hruid", how = "left")
                 d["sub_region_1"] = d[col_hr]
-                d = d.drop(col_hr, axis = 1)
+                d = d.drop(["hruid", col_hr], axis = 1)
                 d["sub_region_1"] = d["sub_region_1"].fillna(unknown)
     elif geo == "can":
         if pt_names == "short":
