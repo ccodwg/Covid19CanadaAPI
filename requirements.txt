@@ -5,6 +5,7 @@ fastapi
 GitPython
 gunicorn
 pandas
+pytz
 requests
 starlette
 uvicorn
