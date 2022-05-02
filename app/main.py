@@ -1,8 +1,10 @@
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
-from starlette.responses import FileResponse
+from starlette.responses import FileResponse, StreamingResponse
 from datetime import date
 import re
+import io
+import csv
 import pandas as pd
 from app.data import data
 
@@ -81,6 +83,11 @@ query_hr_names = Query(
     "hruid",
     description = "How should health regions be named? Can be 'hruid' (unique identifiers), 'canonical' (full official names), 'short' (short names) or 'ccodwg' (names used in the legacy CCODWG dataset).",
     enum = ["hruid", "canonical", "short", "ccodwg"]
+)
+query_fmt = Query(
+    "json",
+    description = "Format to return data in. Can be 'json' (default) or 'csv'. Note that 'csv' will not return any metadata such as the update time.",
+    enum = ["json", "csv"]
 )
 
 # define common functions
@@ -333,7 +340,8 @@ async def get_summary(
     ),
     version: bool = query_version,
     pt_names: str = query_pt_names,
-    hr_names: str = query_hr_names
+    hr_names: str = query_hr_names,
+    fmt: str = query_fmt
 ):
 
     # if no date values specified, use latest date
@@ -393,6 +401,14 @@ async def get_summary(
     # add version to response
     if version is True:
         response["version"] = data.version_ctc
+    
+    # convert response to requested format
+    if fmt == "csv":
+        response = StreamingResponse(
+            io.StringIO(pd.DataFrame(response["data"]).to_csv(
+                index = False, quoting = csv.QUOTE_NONNUMERIC, float_format = "%.0f")),
+                media_type = "text/csv")
+        response.headers["Content-Disposition"] = "attachment; filename=summary.csv"
     
     # return response
     return response
