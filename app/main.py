@@ -13,10 +13,11 @@ tags_metadata = [
 ]
 
 app = FastAPI(
-    title="COVID-19 Canada Open Data Working Group API",
-    docs_url="/",
-    openapi_tags=tags_metadata,
-    recdoc_url=None
+    title = "COVID-19 Canada Open Data Working Group API",
+    version = "0.2.0",
+    docs_url = "/",
+    openapi_tags = tags_metadata,
+    recdoc_url = None
 )
 
 origins = ["*"]
