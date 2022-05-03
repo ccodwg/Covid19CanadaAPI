@@ -47,9 +47,9 @@ def uuid_not_found():
 # define constants
 
 ## metrics available for each geo level
-stats_hr = set(["cases", "deaths"])
-stats_pt = set(["cases", "deaths", "hospitalizations", "icu", "tests_completed"])
-stats_can = set(["cases", "deaths", "hospitalizations", "icu", "tests_completed"])
+stats_hr = ["cases", "deaths"]
+stats_pt = ["cases", "deaths", "hospitalizations", "icu", "tests_completed"]
+stats_can = ["cases", "deaths", "hospitalizations", "icu", "tests_completed"]
 
 # define common query parameters
 query_geo = Query(
