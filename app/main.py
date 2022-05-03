@@ -176,6 +176,11 @@ def convert_names(d, geo, pt_names = "short", hr_names = "hruid"):
     # return data
     return d
 
+# function: format date column for response
+def format_date_col(d, date_format = "%Y-%m-%d"):
+    d["date"] = d["date"].dt.strftime(date_format)
+    return d
+
 # fill missing dates
 def fill_dates(d, geo):
     if geo == "hr":
@@ -265,7 +270,7 @@ async def get_timeseries(
             # convert pt, hr names
             d = convert_names(d, "hr", pt_names = pt_names, hr_names = hr_names)
             # format date column
-            d["date"] = d["date"].dt.strftime("%Y-%m-%d")
+            d = format_date_col(d)
             # add data to response
             response["data"][s] = d.to_dict(orient = "records")
 
@@ -289,7 +294,7 @@ async def get_timeseries(
             # convert pt names
             d = convert_names(d, "pt", pt_names = pt_names)
             # format date column
-            d["date"] = d["date"].dt.strftime("%Y-%m-%d")
+            d = format_date_col(d)
             # add data to response
             response["data"][s] = d.to_dict(orient = "records")
     
@@ -308,7 +313,7 @@ async def get_timeseries(
             # convert Canada names
             d = convert_names(d, "can", pt_names = pt_names)
             # format date column
-            d["date"] = d["date"].dt.strftime("%Y-%m-%d")
+            d = format_date_col(d)
             # add data to response
             response["data"][s] = d.to_dict(orient = "records")
     else:
@@ -384,7 +389,7 @@ async def get_summary(
     # filter by date
     d = date_filter(d, date, after, before)
     # format date column
-    d["date"] = d["date"].dt.strftime("%Y-%m-%d")
+    d = format_date_col(d)
     # convert pt, hr names
     d = convert_names(d, geo, pt_names = pt_names, hr_names = hr_names)
     # fill missing values
