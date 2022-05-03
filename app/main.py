@@ -94,6 +94,9 @@ query_fmt = Query(
 
 # function: filter by date
 def date_filter(d, date, after, before):
+    # HACK: ensure date column is right type
+    if not pd.api.types.is_datetime64_ns_dtype(d["date"]):
+        d["date"] = pd.to_datetime(d["date"])
     if date:
         d = d[d["date"].dt.date == date]
     if after:
@@ -203,6 +206,7 @@ def fill_dates(d, geo):
     df = pd.concat([df] * len(dates), ignore_index = True)
     df = df.sort_values(cols[0:len(cols) - 1])
     df["date"] = dates * df_rows
+    # HACK: ensure date column is correct type
     if not pd.api.types.is_datetime64_ns_dtype(d["date"]):
         d["date"] = pd.to_datetime(d["date"])
     if not pd.api.types.is_datetime64_ns_dtype(df["date"]):
@@ -219,6 +223,16 @@ def fill_dates(d, geo):
         d[stats] = d.groupby(cols[0:len(cols) - 1])[stats].transform(lambda x: x.ffill()) # carry cumulative values forward
     d = d.fillna(value = 0) # fill cumulative values not filled above
     return d
+
+# function: format response as CSV
+def fmt_response_csv(d, file_name):
+    d = d.to_csv(
+        index = False, quoting = csv.QUOTE_NONNUMERIC, float_format = "%.0f")
+    response = StreamingResponse(
+        io.StringIO(d),
+            media_type = "text/csv")
+    response.headers["Content-Disposition"] = "attachment; filename=" + file_name + ".csv"
+    return response
 
 # define routes
 
@@ -243,7 +257,8 @@ async def get_timeseries(
     ),
     version: bool = query_version,
     pt_names: str = query_pt_names,
-    hr_names: str = query_hr_names
+    hr_names: str = query_hr_names,
+    fmt: str = query_fmt
 ):
 
     # initialize response
@@ -322,6 +337,17 @@ async def get_timeseries(
     # add version to response
     if version is True:
         response["version"] = data.version_ctc
+    
+    # convert response to requested format
+    if fmt == "csv":
+        # combine stats into single list
+        out = []
+        for s in response["data"]:
+            for i in response["data"][s]:
+                out.append(i)
+        # format response as CSV
+        response = fmt_response_csv(
+            pd.DataFrame.from_records(out), "timeseries")
     
     # return response
     return response
@@ -409,11 +435,8 @@ async def get_summary(
     
     # convert response to requested format
     if fmt == "csv":
-        response = StreamingResponse(
-            io.StringIO(pd.DataFrame(response["data"]).to_csv(
-                index = False, quoting = csv.QUOTE_NONNUMERIC, float_format = "%.0f")),
-                media_type = "text/csv")
-        response.headers["Content-Disposition"] = "attachment; filename=summary.csv"
+        response = fmt_response_csv(
+            pd.DataFrame.fr(response["data"]), "summary")
     
     # return response
     return response
