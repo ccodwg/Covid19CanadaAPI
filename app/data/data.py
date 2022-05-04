@@ -28,31 +28,38 @@ def load_data_ctc(temp_dir):
     global ctc, keys_pt, keys_hr, version_ctc
 
     # define data
-    files = [
+    files_hr = [
         ("hr", "cases_hr.csv", "cases_hr"),
+        ("hr", "deaths_hr.csv", "deaths_hr")
+    ]
+    files_pt_can = [
         ("pt", "cases_pt.csv", "cases_pt"),
-        ("can", "cases_can.csv", "cases_can"),
-        ("hr", "deaths_hr.csv", "deaths_hr"),
         ("pt", "deaths_pt.csv", "deaths_pt"),
-        ("can", "deaths_can.csv", "deaths_can"),
         ("pt", "hospitalizations_pt.csv", "hospitalizations_pt"),
-        ("can", "hospitalizations_can.csv", "hospitalizations_can"),
         ("pt", "icu_pt.csv", "icu_pt"),
-        ("can", "icu_can.csv", "icu_can"),
         ("pt", "tests_completed_pt.csv", "tests_completed_pt"),
+        ("can", "cases_can.csv", "cases_can"),
+        ("can", "deaths_can.csv", "deaths_can"),
+        ("can", "hospitalizations_can.csv", "hospitalizations_can"),
+        ("can", "icu_can.csv", "icu_can"),
         ("can", "tests_completed_can.csv", "tests_completed_can")
     ]
 
     # load data
     root = os.path.join(temp_dir, "CovidTimelineCanada")
     ctc = {}
-    for i in range(len(files)):
-        ctc[files[i][2]] = pd.read_csv(
-            os.path.join(root, "data", files[i][0], files[i][1]), parse_dates = ["date"])
-    ctc["pt"] = pd.read_csv(os.path.join(root, "geo", "pt.csv"))
-    ctc["hr"] = pd.read_csv(os.path.join(root, "geo", "health_regions.csv"))
+    for i in range(len(files_hr)):
+        ctc[files_hr[i][2]] = pd.read_csv(
+            os.path.join(root, "data", files_hr[i][0], files_hr[i][1]),
+            dtype = {"region": str, "sub_region_1": str}, parse_dates = ["date"])
+    for i in range(len(files_pt_can)):
+        ctc[files_pt_can[i][2]] = pd.read_csv(
+            os.path.join(root, "data", files_pt_can[i][0], files_pt_can[i][1]),
+            dtype = {"region": str}, parse_dates = ["date"])
+    ctc["pt"] = pd.read_csv(os.path.join(root, "geo", "pt.csv"), dtype = str)
+    ctc["hr"] = pd.read_csv(os.path.join(root, "geo", "health_regions.csv"), dtype = str)
     keys_pt = set(ctc["pt"]["region"].tolist())
-    keys_hr = set(ctc["hr"]["hruid"].to_list() + [9999])
+    keys_hr = set(ctc["hr"]["hruid"].to_list() + ['9999'])
     version_ctc = pd.read_csv(os.path.join(root, "update_time.txt"), sep="\t", header=None).head().values[0][0]
     
 # function: update CovidTimelineCanada data
