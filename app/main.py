@@ -179,6 +179,21 @@ def convert_names(d, geo, pt_names = "short", hr_names = "hruid"):
     # return data
     return d
 
+# function: sort rows by region, date, lower geography
+def sort_rows(d, geo, legacy):
+    if geo == "hr":
+        if legacy:
+            d = d.sort_values(["region", "sub_region_1", "date"])
+        else:
+            d = d.sort_values(["region", "date", "sub_region_1"])
+    elif geo == "pt":
+        d = d.sort_values(["region", "date"])
+    elif geo == "can":
+        d = d.sort_values(["date"])
+    else:
+        raise HTTPException(status_code = 400, detail = "Invalid geo")
+    return d
+
 # function: format date column for response
 def format_date_col(d, date_format = "%Y-%m-%d"):
     d["date"] = d["date"].dt.strftime(date_format)
@@ -224,6 +239,34 @@ def fill_dates(d, geo):
     d = d.fillna(value = 0) # fill cumulative values not filled above
     return d
 
+# function: convert to legacy format
+def convert_to_legacy(d, geo, stat):
+    # format date column
+    d = format_date_col(d, "%d-%m-%Y")
+    # drop value name column
+    d = d.drop(columns = ["name"])
+    # convert value columns to int to prevent quoting
+    print(d.columns)
+    d[["value", "value_daily"]] = d[["value", "value_daily"]].astype(int)
+    # convert column names
+    d = d.rename(columns = {"region": "province"})
+    if geo == "hr":
+        d = d.rename(columns = {"sub_region_1": "health_region"})
+    if stat == ["cases"]:
+        d = d.rename(columns = {
+            "date": "date_report", "value": "cumulative_cases", "value_daily": "cases"})
+    elif stat == ["deaths"]:
+        d = d.rename(columns = {
+            "date": "date_death_report", "value": "cumulative_deaths", "value_daily": "deaths"})
+    else:
+        raise HTTPException(status_code = 400, detail = "Invalid stat")
+    # swap order of final two columns so value_daily appears first
+    cols = list(d)
+    cols[len(d.columns) - 1], cols[len(d.columns) - 2] = cols[len(d.columns) - 2], cols[len(d.columns) - 1]
+    d = d.loc[:, cols]
+    # return data
+    return d
+
 # function: format response as CSV
 def fmt_response_csv(d, file_name):
     d = d.to_csv(
@@ -240,7 +283,7 @@ def fmt_response_csv(d, file_name):
 async def get_timeseries(
     stat: list[str] = Query(
         ["all"],
-        description = "One or more metrics to return. By default, all available metrics for the specified geographic level will be returned. One or more of: 'all', 'cases', 'deaths', 'hospitalizations', 'icu', 'tests_completed'.",
+        description = "One or more metrics to return. By default, all available metrics for the specified geographic level will be returned. Can be 'all' or one or more of 'cases', 'deaths', 'hospitalizations', 'icu', 'tests_completed'.",
         enum=["all", "cases", "deaths", "hospitalizations", "icu", "tests_completed"]
     ),
     geo: str = query_geo,
@@ -258,15 +301,33 @@ async def get_timeseries(
     version: bool = query_version,
     pt_names: str = query_pt_names,
     hr_names: str = query_hr_names,
+    legacy: bool = Query(
+        False,
+        description = (
+            "If true, convert the output format to that used by the old COVID-19 Canada Open Data Working Group dataset. "
+            "Default: false. "
+            "Note that you MUST specify either cases or deaths (stat=cases or stat=deaths, not both) or else this parameter will be ignored. "
+            "This parameter also forces the values of several other parameters: fill=true, pt_names=ccodwg, hr_names=ccodwg."
+        )
+    ),
     fmt: str = query_fmt
 ):
 
     # initialize response
     response = {"data": {}}
 
+    # force parameters if legacy parameter is true and stat is cases or deaths
+    if legacy and (stat == ["cases"] or stat == ["deaths"]):
+        fill = True
+        pt_names = "ccodwg"
+        hr_names = "ccodwg"
+    else:
+        # turn off legacy parameter if requirements are not met
+        legacy = False
+
     # get and process data
     if geo == "hr":
-        if stat == ["all"]:
+        if "all" in stat:
             stats = stats_hr
         else:
             stats = [x for x in stat if x in stats_hr]
@@ -284,13 +345,19 @@ async def get_timeseries(
             d = date_filter(d, date, after, before)
             # convert pt, hr names
             d = convert_names(d, "hr", pt_names = pt_names, hr_names = hr_names)
-            # format date column
-            d = format_date_col(d)
+            # sort rows
+            d = sort_rows(d, geo, legacy)
+            # format date column and convert to legacy format if requested
+            if legacy:
+                d = convert_to_legacy(d, geo, stat)
+            else:
+                # format date column
+                d = format_date_col(d)
             # add data to response
             response["data"][s] = d.to_dict(orient = "records")
 
     elif geo == "pt":
-        if stat == ["all"]:
+        if "all" in stat:
             stats = stats_pt
         else:
             stats = [x for x in stat if x in stats_pt]
@@ -308,13 +375,19 @@ async def get_timeseries(
             d = date_filter(d, date, after, before)
             # convert pt names
             d = convert_names(d, "pt", pt_names = pt_names)
-            # format date column
-            d = format_date_col(d)
+            # sort rows
+            d = sort_rows(d, geo, legacy)
+            # format date column and convert to legacy format if requested
+            if legacy:
+                d = convert_to_legacy(d, geo, stat)
+            else:
+                # format date column
+                d = format_date_col(d)
             # add data to response
             response["data"][s] = d.to_dict(orient = "records")
     
     elif geo == "can":
-        if stat == ["all"]:
+        if "all" in stat:
             stats = stats_can
         else:
             stats = [x for x in stat if x in stats_can]
@@ -327,13 +400,19 @@ async def get_timeseries(
             d = date_filter(d, date, after, before)
             # convert Canada names
             d = convert_names(d, "can", pt_names = pt_names)
-            # format date column
-            d = format_date_col(d)
+            # sort rows
+            d = sort_rows(d, geo, legacy)
+            # format date column and convert to legacy format if requested
+            if legacy:
+                d = convert_to_legacy(d, geo, stat)
+            else:
+                # format date column
+                d = format_date_col(d)
             # add data to response
             response["data"][s] = d.to_dict(orient = "records")
     else:
         raise HTTPException(status_code = 400, detail = "Invalid geo")
-    
+
     # add version to response
     if version is True:
         response["version"] = data.version_ctc
