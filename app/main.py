@@ -48,8 +48,28 @@ def uuid_not_found():
 
 ## metrics available for each geo level
 stats_hr = ["cases", "deaths"]
-stats_pt = ["cases", "deaths", "hospitalizations", "icu", "tests_completed"]
-stats_can = ["cases", "deaths", "hospitalizations", "icu", "tests_completed"]
+stats_pt = [
+    "cases",
+    "deaths",
+    "hospitalizations",
+    "icu",
+    "tests_completed",
+    "vaccine_coverage_dose_1",
+    "vaccine_coverage_dose_2",
+    "vaccine_coverage_dose_3",
+    "vaccine_coverage_dose_4"
+    ]
+stats_can = [
+    "cases",
+    "deaths",
+    "hospitalizations",
+    "icu",
+    "tests_completed",
+    "vaccine_coverage_dose_1",
+    "vaccine_coverage_dose_2",
+    "vaccine_coverage_dose_3",
+    "vaccine_coverage_dose_4"
+    ]
 
 # define common query parameters
 query_geo = Query(
@@ -283,8 +303,19 @@ def fmt_response_csv(d, file_name):
 async def get_timeseries(
     stat: list[str] = Query(
         ["all"],
-        description = "One or more metrics to return. By default, all available metrics for the specified geographic level will be returned. Can be 'all' or one or more of 'cases', 'deaths', 'hospitalizations', 'icu', 'tests_completed'.",
-        enum=["all", "cases", "deaths", "hospitalizations", "icu", "tests_completed"]
+        description = "One or more metrics to return. By default, all available metrics for the specified geographic level will be returned. Can be 'all' or one or more of the metrics listed below.\n* cases\n* deaths\n* hospitalizations\n* icu\n* tests_completed\n* vaccine_coverage_dose_1\n* vaccine_coverage_dose_2\n* vaccine_coverage_dose_3\n* vaccine_coverage_dose_4",
+        enum=[
+            "all",
+            "cases",
+            "deaths",
+            "hospitalizations",
+            "icu",
+            "tests_completed",
+            "vaccine_coverage_dose_1",
+            "vaccine_coverage_dose_2",
+            "vaccine_coverage_dose_3",
+            "vaccine_coverage_dose_4"
+            ]
     ),
     geo: str = query_geo,
     loc: list[str] | None = query_loc,

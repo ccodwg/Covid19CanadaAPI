@@ -38,11 +38,19 @@ def load_data_ctc(temp_dir):
         ("pt", "hospitalizations_pt.csv", "hospitalizations_pt"),
         ("pt", "icu_pt.csv", "icu_pt"),
         ("pt", "tests_completed_pt.csv", "tests_completed_pt"),
+        ("pt", "vaccine_coverage_dose_1_pt.csv", "vaccine_coverage_dose_1_pt"),
+        ("pt", "vaccine_coverage_dose_2_pt.csv", "vaccine_coverage_dose_2_pt"),
+        ("pt", "vaccine_coverage_dose_3_pt.csv", "vaccine_coverage_dose_3_pt"),
+        ("pt", "vaccine_coverage_dose_4_pt.csv", "vaccine_coverage_dose_4_pt"),
         ("can", "cases_can.csv", "cases_can"),
         ("can", "deaths_can.csv", "deaths_can"),
         ("can", "hospitalizations_can.csv", "hospitalizations_can"),
         ("can", "icu_can.csv", "icu_can"),
-        ("can", "tests_completed_can.csv", "tests_completed_can")
+        ("can", "tests_completed_can.csv", "tests_completed_can"),
+        ("can", "vaccine_coverage_dose_1_can.csv", "vaccine_coverage_dose_1_can"),
+        ("can", "vaccine_coverage_dose_2_can.csv", "vaccine_coverage_dose_2_can"),
+        ("can", "vaccine_coverage_dose_3_can.csv", "vaccine_coverage_dose_3_can"),
+        ("can", "vaccine_coverage_dose_4_can.csv", "vaccine_coverage_dose_4_can")
     ]
 
     # load data
