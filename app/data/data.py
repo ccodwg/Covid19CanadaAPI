@@ -42,6 +42,10 @@ def load_data_ctc(temp_dir):
         ("pt", "vaccine_coverage_dose_2_pt.csv", "vaccine_coverage_dose_2_pt"),
         ("pt", "vaccine_coverage_dose_3_pt.csv", "vaccine_coverage_dose_3_pt"),
         ("pt", "vaccine_coverage_dose_4_pt.csv", "vaccine_coverage_dose_4_pt"),
+        ("pt", "vaccine_administration_total_doses_pt.csv", "vaccine_administration_total_doses_pt"),
+        ("pt", "vaccine_administration_dose_1_pt.csv", "vaccine_administration_dose_1_pt"),
+        ("pt", "vaccine_administration_dose_2_pt.csv", "vaccine_administration_dose_2_pt"),
+        ("pt", "vaccine_administration_dose_3_pt.csv", "vaccine_administration_dose_3_pt"),
         ("can", "cases_can.csv", "cases_can"),
         ("can", "deaths_can.csv", "deaths_can"),
         ("can", "hospitalizations_can.csv", "hospitalizations_can"),
@@ -50,7 +54,11 @@ def load_data_ctc(temp_dir):
         ("can", "vaccine_coverage_dose_1_can.csv", "vaccine_coverage_dose_1_can"),
         ("can", "vaccine_coverage_dose_2_can.csv", "vaccine_coverage_dose_2_can"),
         ("can", "vaccine_coverage_dose_3_can.csv", "vaccine_coverage_dose_3_can"),
-        ("can", "vaccine_coverage_dose_4_can.csv", "vaccine_coverage_dose_4_can")
+        ("can", "vaccine_coverage_dose_4_can.csv", "vaccine_coverage_dose_4_can"),
+        ("can", "vaccine_administration_total_doses_can.csv", "vaccine_administration_total_doses_can"),
+        ("can", "vaccine_administration_dose_1_can.csv", "vaccine_administration_dose_1_can"),
+        ("can", "vaccine_administration_dose_2_can.csv", "vaccine_administration_dose_2_can"),
+        ("can", "vaccine_administration_dose_3_can.csv", "vaccine_administration_dose_3_can")
     ]
 
     # load data
