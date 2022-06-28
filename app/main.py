@@ -1,7 +1,8 @@
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.responses import FileResponse, StreamingResponse
-from datetime import date
+from datetime import date, datetime
+import pytz
 import re
 import io
 import csv
@@ -43,6 +44,10 @@ def query_no_results():
 ## UUID not found text
 def uuid_not_found():
     return "UUID not found. Please try again with a valid UUID."
+
+## get current datetime in America/Toronto
+def get_datetime():
+    return datetime.now(pytz.timezone("America/Toronto"))
 
 # define constants
 
@@ -245,7 +250,7 @@ def fill_dates(d, geo):
     df = d[cols[0:len(cols) - 1]].drop_duplicates()
     df_rows = len(df)
     dates = pd.date_range(
-        d["date"].min(), d["date"].max(), freq = "d").to_list()
+        d["date"].min(), get_datetime().date(), freq = "d").to_list()
     df = pd.concat([df] * len(dates), ignore_index = True)
     df = df.sort_values(cols[0:len(cols) - 1])
     df["date"] = dates * df_rows
