@@ -525,7 +525,7 @@ async def get_summary(
 
     # if no date values specified, use latest date
     if not date and not after and not before:
-        date = 1 # latest date of data
+        date = str(1) # latest date of data
 
     # initialize response
     response = {"data": {}}
@@ -561,7 +561,7 @@ async def get_summary(
     if loc:
         d = loc_filter(d, geo, loc)
     # filter by date
-    d = date_filter(d, str(date), after, before, date_invalid_returns_latest = True)
+    d = date_filter(d, date, after, before, date_invalid_returns_latest = True)
     # format date column
     d = format_date_col(d)
     # convert pt, hr names
