@@ -97,7 +97,7 @@ query_loc = Query(
         "If not provided, all available data will be returned."))
 query_date = Query(
     None,
-    description = "Filter to include data only from this date (YYYY-MM-DD).")
+    description = "Filter to include data only from this date (YYYY-MM-DD). Alternatively, a positive integer will return the latest x days of data and a negative integer will return the earliest x days of data. This is calculated separately for each geographic group, so the dates returned may differ between provinces/territories.")
 query_after = Query(
     None,
     description = "Filter to include data only from after and including this date (YYYY-MM-DD).")
@@ -126,12 +126,33 @@ query_fmt = Query(
 # define common functions
 
 # function: filter by date
-def date_filter(d, date, after, before):
+def date_filter(d, date, after, before, date_invalid_returns_latest = False):
     # HACK: ensure date column is right type
     if not pd.api.types.is_datetime64_ns_dtype(d["date"]):
         d["date"] = pd.to_datetime(d["date"])
+    # date: specific date or latest/earlier x days
     if date:
-        d = d[d["date"].dt.date == date]
+        # case: date is date
+        if re.match(r"^\d{4}-\d{2}-\d{2}$", date):
+            d = d[d["date"].dt.date == pd.to_datetime(date)]
+        # case: date is positive integer
+        elif date.isdigit():
+            # get grouping columns
+            geo_cols = [x for x in ['region', 'sub_region_1', 'sub_region_2'] if x in d.columns]
+            d = d.groupby(geo_cols).tail(int(date))
+        # case: date is negative integer
+        elif date.startswith("-") and date[1:].isdigit():
+            geo_cols = [x for x in ['region', 'sub_region_1', 'sub_region_2'] if x in d.columns]
+            d = d.groupby(geo_cols).head(-int(date))
+        # case: date is invalid
+        else:
+            if date_invalid_returns_latest:
+                # if invalid value for date, return latest (default behaviour for summary route)
+                geo_cols = [x for x in ['region', 'sub_region_1', 'sub_region_2'] if x in d.columns]
+                d = d.groupby(geo_cols).tail(1)
+            else:
+                # if invalid value for date, ignore parameter (default behaviour for timeseries route)
+                pass
     if after:
         d = d[d["date"].dt.date >= after]
     if before:
@@ -336,7 +357,7 @@ async def get_timeseries(
     ),
     geo: str = query_geo,
     loc: list[str] | None = query_loc,
-    date: date | None = query_date,
+    date: str | None = query_date,
     after: date | None = query_after,
     before: date | None = query_before,
     fill: bool = Query(
@@ -483,9 +504,9 @@ async def get_timeseries(
 async def get_summary(
     geo: str = query_geo,
     loc: list[str] | None = query_loc,
-    date: date = Query(
+    date: str = Query(
         None,
-        description = "Return summary for this date (YYYY-MM-DD). By default, the latest available date."
+        description = "Return summary for this date (YYYY-MM-DD). By default, the latest available date. Alternatively, a positive integer will return the latest x days of data and a negative integer will return the earliest x days of data."
     ),
     after: date | None = query_after,
     before: date | None = query_before,
@@ -504,7 +525,7 @@ async def get_summary(
 
     # if no date values specified, use latest date
     if not date and not after and not before:
-        date = pd.to_datetime(data.version_ctc[0:10], format = "%Y-%m-%d").date()
+        date = 1 # latest date of data
 
     # initialize response
     response = {"data": {}}
@@ -540,7 +561,7 @@ async def get_summary(
     if loc:
         d = loc_filter(d, geo, loc)
     # filter by date
-    d = date_filter(d, date, after, before)
+    d = date_filter(d, str(date), after, before, date_invalid_returns_latest = True)
     # format date column
     d = format_date_col(d)
     # convert pt, hr names
