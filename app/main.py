@@ -593,22 +593,30 @@ async def get_summary(
 async def get_datasets(
     uuid: str = Query(
         None,
-        description = "UUID of dataset from datasets.json")
+        description = "UUID of dataset from datasets.json"),
+    version: bool = query_version
 ):
     
     # read UUIDs
-    if uuid is None:
-        return data.datasets
-    else:
+    if uuid is not None:
         uuid = uuid.split("|")
     
+    # initialize response
+    response = {"data": {}}
+
     # filter dictionary
-    response = data.datasets
     try:
-        response = {k: response[k] for k in uuid}
+        if uuid is None:
+            response["data"] = data.datasets
+        else:
+            response["data"] = {k: data.datasets[k] for k in uuid}
     except Exception:
         raise HTTPException(status_code=400, detail=uuid_not_found())
     
+    # add version to response
+    if version is True:
+        response["version"] = data.version_datasets
+
     # return response
     return(response)
 
@@ -625,7 +633,8 @@ async def get_archive(
         None,
         description = "One of 'all', 'latest', 'first' or a date in YYYY-MM-DD format. If not specified, 'all' is used."),
     after: date | None = query_after,
-    before: date | None = query_before
+    before: date | None = query_before,
+    version: bool = query_version
 ):
     
     # read UUIDs
@@ -639,6 +648,9 @@ async def get_archive(
         # if no filters, return all
         date = "all"
     
+    # intialize response
+    response = {"data": {}}
+
     # get dataframe
     df = data.archive["index"]
     df = df[df["uuid"].isin(uuid)]
@@ -679,8 +691,12 @@ async def get_archive(
     
     # format output
     df["file_date_true"] = df["file_date_true"].dt.strftime("%Y-%m-%d")
-    response = df.to_dict(orient="records")
+    response["data"] = df.to_dict(orient="records")
     
+    # add version to response
+    if version is True:
+        response["version"] = data.version_archive_index
+
     # return response
     return response
 
