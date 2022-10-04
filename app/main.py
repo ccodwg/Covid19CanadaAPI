@@ -66,7 +66,8 @@ stats_pt = [
     "vaccine_administration_total_doses",
     "vaccine_administration_dose_1",
     "vaccine_administration_dose_2",
-    "vaccine_administration_dose_3"
+    "vaccine_administration_dose_3",
+    "vaccine_administration_dose_4"
     ]
 stats_can = [
     "cases",
@@ -81,7 +82,8 @@ stats_can = [
     "vaccine_administration_total_doses",
     "vaccine_administration_dose_1",
     "vaccine_administration_dose_2",
-    "vaccine_administration_dose_3"
+    "vaccine_administration_dose_3",
+    "vaccine_administration_dose_4"
     ]
 
 # define common query parameters
@@ -337,7 +339,7 @@ def fmt_response_csv(d, file_name):
 async def get_timeseries(
     stat: list[str] = Query(
         ["all"],
-        description = "One or more metrics to return. By default, all available metrics for the specified geographic level will be returned. Can be 'all' or one or more of the metrics listed below.\n* cases\n* deaths\n* hospitalizations\n* icu\n* tests_completed\n* vaccine_coverage_dose_1\n* vaccine_coverage_dose_2\n* vaccine_coverage_dose_3\n* vaccine_coverage_dose_4\n* vaccine_administration_total_doses\n* vaccine_administration_dose_1\n* vaccine_administration_dose_2\n* vaccine_administration_dose_3",
+        description = "One or more metrics to return. By default, all available metrics for the specified geographic level will be returned. Can be 'all' or one or more of the metrics listed below.\n* cases\n* deaths\n* hospitalizations\n* icu\n* tests_completed\n* vaccine_coverage_dose_1\n* vaccine_coverage_dose_2\n* vaccine_coverage_dose_3\n* vaccine_coverage_dose_4\n* vaccine_administration_total_doses\n* vaccine_administration_dose_1\n* vaccine_administration_dose_2\n* vaccine_administration_dose_3\n* vaccine_administration_dose_4",
         enum=[
             "all",
             "cases",
@@ -352,7 +354,8 @@ async def get_timeseries(
             "vaccine_administration_total_doses",
             "vaccine_administration_dose_1",
             "vaccine_administration_dose_2",
-            "vaccine_administration_dose_3"
+            "vaccine_administration_dose_3",
+            "vaccine_administration_dose_4"
             ]
     ),
     geo: str = query_geo,
