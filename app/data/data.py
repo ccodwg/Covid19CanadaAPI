@@ -7,9 +7,6 @@ from datetime import datetime
 from pytz import utc, timezone
 import json
 import requests
-from boto3 import client
-from botocore import UNSIGNED
-from botocore.client import Config
 import tempfile
 import git
 
@@ -146,10 +143,8 @@ def load_data_archive_index():
     
     ## load file index into "archive" dictionary
     print("Downloading archive file index...")
-    file = client("s3", config=Config(signature_version=UNSIGNED)).get_object(Bucket="data.opencovid.ca", Key="archive/file_index.csv")
-    archive["index"] = pd.read_csv(io.BytesIO(file["Body"].read()))
-    version_archive_index = file["ResponseMetadata"]["HTTPHeaders"]["last-modified"]
-    version_archive_index = convert_timestamp(version_archive_index)
+    archive["index"] = pd.read_csv("https://data.opencovid.ca/archive/file_index.csv")
+    version_archive_index = requests.get("https://data.opencovid.ca/archive/update_time.txt").content
     print("File index ready.")
     
 ## function: update archive file index
@@ -160,8 +155,7 @@ def update_data_archive_index():
     
     ## read in updated file index if version has changed
     print("Checking if archive file index has changed...")
-    version_archive_index_new = client("s3", config=Config(signature_version=UNSIGNED)).get_object(Bucket="data.opencovid.ca", Key="archive/file_index.csv")["ResponseMetadata"]["HTTPHeaders"]["last-modified"]
-    version_archive_index_new = convert_timestamp(version_archive_index_new)
+    version_archive_index_new = requests.get("https://data.opencovid.ca/archive/update_time.txt").content
     if (version_archive_index_new != version_archive_index):
         print("Archive file index has changed. Reloading index...")
         load_data_archive_index()
@@ -192,7 +186,7 @@ load_data_datasets()
 ## archive file index
 global archive, version_archive_index
 archive = {}
-version_archive_index = client("s3", config=Config(signature_version=UNSIGNED)).head_object(Bucket="data.opencovid.ca", Key="archive/file_index.csv")["ResponseMetadata"]["HTTPHeaders"]["last-modified"]
+version_archive_index = requests.get("https://data.opencovid.ca/archive/update_time.txt").content
 load_data_archive_index()
 
 # schedule data updates

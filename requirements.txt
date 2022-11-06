@@ -1,6 +1,4 @@
 APScheduler
-boto3
-botocore
 fastapi
 GitPython
 gunicorn
