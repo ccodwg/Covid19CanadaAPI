@@ -10,6 +10,12 @@ import requests
 import tempfile
 import git
 
+# define no cache headers
+no_cache_headers = {
+    "Cache-Control": "no-cache",
+    "Pragma": "no-cache"
+}
+
 # function: convert timestamp
 def convert_timestamp(v):
     v = datetime.strptime(v, "%a, %d %b %Y %H:%M:%S %Z")
@@ -106,7 +112,7 @@ def load_data_datasets():
     
     # load datasets.json into a single dictionary
     print("Downloading datasets.json...")
-    file = requests.get("https://raw.githubusercontent.com/ccodwg/Covid19CanadaArchive/master/datasets.json")
+    file = requests.get("https://raw.githubusercontent.com/ccodwg/Covid19CanadaArchive/master/datasets.json", headers = no_cache_headers)
     file = json.loads(file.content)
     ds = {}
     for a in file:
@@ -114,7 +120,7 @@ def load_data_datasets():
             for i in range(len(file[a][d])):
                     ds[file[a][d][i]["uuid"]] = file[a][d][i]
     datasets = ds
-    version_datasets = requests.get("https://api.github.com/repos/ccodwg/Covid19CanadaArchive/commits?path=datasets.json").headers["last-modified"]
+    version_datasets = requests.get("https://api.github.com/repos/ccodwg/Covid19CanadaArchive/commits?path=datasets.json", headers = no_cache_headers).headers["last-modified"]
     version_datasets = convert_timestamp(version_datasets)
     print("File datasets.json ready.")
 
@@ -126,7 +132,7 @@ def update_data_datasets():
     
     # read in updated datasets.json if version has changed
     print("Checking if datasets.json has changed...")
-    version_datasets_new = requests.get("https://api.github.com/repos/ccodwg/Covid19CanadaArchive/commits?path=datasets.json").headers["last-modified"]
+    version_datasets_new = requests.get("https://api.github.com/repos/ccodwg/Covid19CanadaArchive/commits?path=datasets.json", headers = no_cache_headers).headers["last-modified"]
     version_datasets_new = convert_timestamp(version_datasets_new)
     if (version_datasets_new != version_datasets):
         print("File datasets.json has changed. Reloading index...")
@@ -144,7 +150,7 @@ def load_data_archive_index():
     ## load file index into "archive" dictionary
     print("Downloading archive file index...")
     archive["index"] = pd.read_csv("https://data.opencovid.ca/archive/file_index.csv")
-    version_archive_index = requests.get("https://data.opencovid.ca/archive/update_time.txt").content
+    version_archive_index = requests.get("https://data.opencovid.ca/archive/update_time.txt", headers = no_cache_headers).content
     print("File index ready.")
     
 ## function: update archive file index
@@ -155,7 +161,7 @@ def update_data_archive_index():
     
     ## read in updated file index if version has changed
     print("Checking if archive file index has changed...")
-    version_archive_index_new = requests.get("https://data.opencovid.ca/archive/update_time.txt").content
+    version_archive_index_new = requests.get("https://data.opencovid.ca/archive/update_time.txt", headers = no_cache_headers).content
     if (version_archive_index_new != version_archive_index):
         print("Archive file index has changed. Reloading index...")
         load_data_archive_index()
@@ -180,13 +186,13 @@ print("CovidTimelineCanada data are ready.")
 ## datasets.json
 global datasets, version_datasets
 datasets = {}
-version_datasets = requests.get("https://api.github.com/repos/ccodwg/Covid19CanadaArchive/commits?path=datasets.json").headers["last-modified"]
+version_datasets = requests.get("https://api.github.com/repos/ccodwg/Covid19CanadaArchive/commits?path=datasets.json", headers = no_cache_headers).headers["last-modified"]
 load_data_datasets()
 
 ## archive file index
 global archive, version_archive_index
 archive = {}
-version_archive_index = requests.get("https://data.opencovid.ca/archive/update_time.txt").content
+version_archive_index = requests.get("https://data.opencovid.ca/archive/update_time.txt", headers = no_cache_headers).content
 load_data_archive_index()
 
 # schedule data updates
