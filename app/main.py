@@ -136,7 +136,7 @@ def date_filter(d, date, after, before, date_invalid_returns_latest = False):
     if date:
         # case: date is date
         if re.match(r"^\d{4}-\d{2}-\d{2}$", date):
-            d = d[d["date"].dt.date == pd.to_datetime(date)]
+            d = d[d["date"].dt.date == pd.to_datetime(date).date()]
         # case: date is positive integer
         elif date.isdigit():
             # get grouping columns
