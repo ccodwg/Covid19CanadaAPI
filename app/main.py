@@ -95,7 +95,7 @@ query_loc = Query(
     None,
     description = (
         "Specific geography to filter to. "
-        "Can be one or more two-letter province/territory codes (https://github.com/ccodwg/CovidTimelineCanada/blob/main/geo/pt.csv) and/or health region unique identifiers (https://github.com/ccodwg/CovidTimelineCanada/blob/main/geo/health_regions.csv; 9999 is 'Unknown'). "
+        "Can be one or more two-letter province/territory codes (https://github.com/ccodwg/CovidTimelineCanada/blob/main/geo/pt.csv) and/or health region unique identifiers (https://github.com/ccodwg/CovidTimelineCanada/blob/main/geo/hr.csv; 9999 is 'Unknown'). "
         "If not provided, all available data will be returned."))
 query_date = Query(
     None,

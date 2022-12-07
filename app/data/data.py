@@ -78,7 +78,7 @@ def load_data_ctc(temp_dir):
             os.path.join(root, "data", files_pt_can[i][0], files_pt_can[i][1]),
             dtype = {"region": str}, parse_dates = ["date"])
     ctc["pt"] = pd.read_csv(os.path.join(root, "geo", "pt.csv"), dtype = str)
-    ctc["hr"] = pd.read_csv(os.path.join(root, "geo", "health_regions.csv"), dtype = str)
+    ctc["hr"] = pd.read_csv(os.path.join(root, "geo", "hr.csv"), dtype = str)
     keys_pt = set(ctc["pt"]["region"].tolist())
     keys_hr = set(ctc["hr"]["hruid"].to_list() + ['9999'])
     version_ctc = pd.read_csv(os.path.join(root, "update_time.txt"), sep="\t", header=None).head().values[0][0]
