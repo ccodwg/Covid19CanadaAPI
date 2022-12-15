@@ -1,13 +1,13 @@
 # load libraries
 from apscheduler.schedulers.background import BackgroundScheduler
 import os
-import io
 import pandas as pd
 from datetime import datetime
 from pytz import utc, timezone
 import json
 import requests
 import tempfile
+import sqlite3
 import git
 
 # define no cache headers
@@ -145,11 +145,40 @@ def update_data_datasets():
 def load_data_archive_index():
     
     ## make data available globally
-    global archive, version_archive_index
+    global archive, version_archive_index, datasets
     
     ## load file index into "archive" dictionary
     print("Downloading archive file index...")
-    archive["index"] = pd.read_csv("https://data.opencovid.ca/archive/file_index.csv")
+    ## download database as temporary file
+    temp = tempfile.NamedTemporaryFile()
+    with open(temp.name, "wb") as f:
+        f.write(requests.get("https://data.opencovid.ca/archive/index.db", headers = no_cache_headers).content)
+    ## read database into DataFrame
+    archive["index"] = pd.read_sql("SELECT * FROM archive", sqlite3.connect(temp.name))
+    ## download latest version of datasets.json
+    load_data_datasets()
+    ## extract uuid, dir_parent, dir_file from datasets.json for each dataset
+    datasets_meta = pd.DataFrame.from_dict(datasets, orient = "index")[["uuid", "dir_parent", "dir_file"]]
+    ## merge dataset metadata with archive index
+    archive["index"] = pd.merge(archive["index"], datasets_meta, on = "uuid", how = "left")
+    ## for each non-duplicate file, calculate file URL
+    archive_unique = archive["index"][archive["index"]["file_duplicate"] == 0]
+    # temporarily disable pandas chained assignment warning
+    # otherwise, a sprurious warning will be printed
+    pd_option = pd.get_option('chained_assignment') # save previous value
+    pd.set_option('chained_assignment', None) # disable
+    archive_unique["file_url"] = "https://data.opencovid.ca/archive/" + archive_unique["dir_parent"] + "/" + archive_unique["dir_file"] + "/" + archive_unique["file_name"]
+    # reset pandas chained assignment warning option
+    pd.set_option('chained_assignment', pd_option) # reset
+    ## join file URL back to archive index
+    archive["index"] = pd.merge(archive["index"], archive_unique[["uuid", "file_md5", "file_size", "file_url"]], on = ["uuid", "file_md5", "file_size"], how = "left")
+    ## calculate whether file is the final unique file for a given UUID and date
+    archive["index"]["file_final_for_date"] = archive["index"].groupby(["uuid", "file_date"])["file_timestamp"].transform(max) == archive["index"]["file_timestamp"]
+    archive["index"]["file_final_for_date"] = archive["index"]["file_final_for_date"].astype(int)
+    ## reorder columns
+    archive["index"] = archive["index"][[
+        "uuid", "dir_parent", "dir_file", "file_name", "file_timestamp", "file_date", "file_duplicate", "file_final_for_date", "file_md5", "file_size", "file_url"]]
+    ## update version
     version_archive_index = requests.get("https://data.opencovid.ca/archive/update_time.txt", headers = no_cache_headers).content
     print("File index ready.")
     

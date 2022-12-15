@@ -632,6 +632,10 @@ async def get_archive(
         False,
         description = "Keep only the first instance of each unique data file? Default: false."
     ),
+    keep_only_final_for_date: bool = Query(
+        True,
+        description = "Keep only the final file downloaded on each date? Default: true. Generally, only one file per date exists, but in some cases there are multiple unique files on a single date."
+    ),
     date: str | None = Query(
         None,
         description = "One of 'all', 'latest', 'first' or a date in YYYY-MM-DD format. If not specified, 'all' is used."),
@@ -663,7 +667,7 @@ async def get_archive(
         raise HTTPException(status_code=400, detail=uuid_not_found())
     
     # date filtering
-    df["file_date_true"] = pd.to_datetime(df["file_date_true"])
+    df["file_date"] = pd.to_datetime(df["file_date"])
     if date:
         # if date is defined, after and before are ignored
         if (date == "all"):
@@ -674,12 +678,12 @@ async def get_archive(
             df = df.groupby("uuid").first()
         else:
             if date:
-                df = df[df["file_date_true"].dt.date == pd.to_datetime(date, format = "%Y-%m-%d").date()]
+                df = df[df["file_date"].dt.date == pd.to_datetime(date, format = "%Y-%m-%d").date()]
     else:
         if after:
-            df = df[df["file_date_true"].dt.date >= after]
+            df = df[df["file_date"].dt.date >= after]
         if before:
-            df = df[df["file_date_true"].dt.date <= before]
+            df = df[df["file_date"].dt.date <= before]
     
     # return 400 if no results found
     if len(df) == 0:
@@ -690,10 +694,14 @@ async def get_archive(
     # since the first instance of a duplicate dataset may not
     # be in the filtered sample
     if (remove_duplicates is True):
-        df = df.drop_duplicates(subset=["file_etag"])
+        df = df.drop_duplicates(subset=["file_md5"])
+    
+    # filter files to keep only the last file downloaded on each date
+    if (keep_only_final_for_date is True):
+        df = df[df["file_final_for_date"] == 1]
     
     # format output
-    df["file_date_true"] = df["file_date_true"].dt.strftime("%Y-%m-%d")
+    df["file_date"] = df["file_date"].dt.strftime("%Y-%m-%d")
     response["data"] = df.to_dict(orient="records")
     
     # add version to response
