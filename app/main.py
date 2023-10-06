@@ -301,8 +301,6 @@ def convert_to_legacy(d, geo, stat):
     d = format_date_col(d, "%d-%m-%Y")
     # drop value name column
     d = d.drop(columns = ["name"])
-    # convert value columns to int to prevent quoting
-    print(d.columns)
     d[["value", "value_daily"]] = d[["value", "value_daily"]].astype(int)
     # convert column names
     d = d.rename(columns = {"region": "province"})
