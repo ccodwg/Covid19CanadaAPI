@@ -1,6 +1,6 @@
 # API for the COVID-19 Open Data Working Group dataset
 
-This repository contains the code underlying the API for the [COVID-19 Open Data Working Group](https://opencovid.ca/) [dataset](https://github.com/ccodwg/CovidTimelineCanada) available at the following URL: [https://api.opencovid.ca/](https://api.opencovid.ca/)
+This repository contains the code underlying the API for the [COVID-19 Open Data Working Group](https://opencovid.ca/) [dataset](https://github.com/ccodwg/CovidTimelineCanada). The API has been retired as of February 1, 2024, but it was previously available at the following URL: [https://api.opencovid.ca/](https://api.opencovid.ca/).
 
 ## Running the API locally
 
